@@ -171,6 +171,65 @@ A 14-day free trial exists on paid plans but needs a card.
 **Update frequency & limits:** near real-time on paid tiers; 2,000–5,000
 calls/hour depending on tier (see table).
 
+#### Checked 24 September 2026: does Sportmonks have a free plan that covers the Premier League?
+
+**No.** Sportmonks does have a permanent free plan (no card needed), but it only
+covers two fixed competitions: **the Danish Superliga and the Scottish
+Premiership** (including play-offs) — you cannot swap these for the Premier
+League or any other league. Source:
+[sportmonks.com/football-api/free-plan](https://www.sportmonks.com/football-api/free-plan/).
+The free plan otherwise carries the full feature set (fixtures, live scores,
+stats, squads), so it's a genuine way to test the API's shape, just not
+against the league we need.
+
+The only way to see Premier League data without committing long-term is the
+**14-day trial that comes automatically with any paid plan** (Starter
+included) — but it needs a card on file, and it auto-charges for the first
+month unless cancelled before day 14. Sportmonks' own FAQ: "Once subscribed
+to one of our plans you will automatically receive the 14-day trial. After
+14 days, your credit card will be charged, unless you choose to cancel," and
+"You're only permitted to have one free trial." So there is no way to see
+real Premier League data from Sportmonks with zero financial commitment —
+building on sample data first (as `docs/PLAN.md` now does) avoids needing
+that trial at all until we're ready to commit.
+
+**Storing our own copy of the data and showing it to users**, quoted verbatim
+from [sportmonks.com/terms-of-service](https://www.sportmonks.com/terms-of-service/):
+- "Distribution, transfer, and storage of data provided by our services is
+  allowed, but reselling the product is forbidden without our consent."
+- "If you use our data to create something based on our data and start
+  earning money from your creation, everything is fine." (Their own plain-English
+  summary of what showing it to paying users is allowed to look like.)
+- The only thing barred outright: "you cannot directly sell the data we
+  provide" / "Reselling Sportmonks' data without approval is not allowed" —
+  i.e. we can store it in our own database and show it inside Fairline's
+  screens, but we could not offer a raw "Sportmonks data feed" as our own
+  product.
+- The terms of service page does **not** state a specific data-retention
+  time limit (how long we're allowed to keep a stored row) — nothing there
+  says we have to delete anything after N days. If that matters later
+  (e.g. for a "data export/delete" request), ask them directly rather than
+  assuming.
+
+**Requests per hour**, quoted verbatim from the API docs
+([docs.sportmonks.com/v3/api/rate-limit](https://docs.sportmonks.com/v3/api/rate-limit)):
+limits are set "per entity, not per endpoint" (Fixture, Team, Player, League
+etc. each get their own separate hourly allowance), and exceeding one entity's
+limit returns "a `429 Too Many Requests` error" — but "you can still call
+other entities" while that one resets.
+
+| Plan | Requests / entity / hour |
+|---|---|
+| Free | 3,000 |
+| Starter | 2,000 |
+| Growth | 2,500 |
+| Pro | 3,000 |
+| Enterprise | 5,000 |
+
+(Yes, the free plan's per-entity limit is higher than Starter's — Sportmonks
+doesn't scale this number strictly with price, it scales with league count
+and overall account tier.)
+
 ### Other options found, not recommended for now
 
 - **TheStatsAPI** — a newer, smaller competitor. Its own site

@@ -66,6 +66,7 @@ Fill these in once the project is scaffolded, and keep them current.
 - Tests: `npm test` (database tests also run when `TEST_DATABASE_URL` is set; see README)
 - Type check: `npm run typecheck`
 - Lint: `npm run lint`
+- Historical data and backtest: `npm run data:fetch`, then `npm run backtest`
 - Database migrations: `supabase/migrations/` (numbered files, never edit one after it has been applied; add a new one). Seed data: `supabase/seed.sql`
 
 ## Current focus

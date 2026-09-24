@@ -13,6 +13,8 @@ Product rules: `CLAUDE.md` and `docs/MASTER_BRIEF.md`.
 | Tests | `npm test` |
 | Type check | `npm run typecheck` |
 | Lint | `npm run lint` |
+| Download historical data (free) | `npm run data:fetch` |
+| Run the model backtests | `npm run backtest` (v1) and `npm run backtest:v2` (add `-- --fit` to re-pick settings) |
 
 ### Database tests
 
@@ -27,6 +29,8 @@ A throwaway database is created and dropped each run; the one in the URL is not 
 ## Layout
 
 - `src/lib/value/` – value maths (implied probability, margin removal, edge, minimum price) and tests
+- `src/lib/models/football/` – football_1x2_v1 ratings model (see `docs/MODELS.md`)
+- `src/lib/backtest/` – walk-forward replay and scoring; report in `docs/backtests/`
 - `supabase/migrations/` – database changes, numbered. Never edit one after it has been applied; add a new one.
 - `supabase/seed.sql` – made-up test data for local development
 - `.env.example` – the settings the app needs, with fake values

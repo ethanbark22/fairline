@@ -1,14 +1,6 @@
--- 0003: Model versions, the prediction ledger and results.
+-- 0004_ledger: the prediction ledger and results.
 -- Predictions are immutable: once saved they can never be changed or deleted.
 -- Results and closing prices live in prediction_results instead.
-
-create table model_versions (
-  id uuid primary key default gen_random_uuid(),
-  key text not null unique,            -- e.g. 'football_match_ratings_v0.1'
-  sport_id uuid not null references sports (id),
-  description text not null,
-  created_at timestamptz not null default now()
-);
 
 create table predictions (
   id uuid primary key default gen_random_uuid(),
@@ -94,3 +86,10 @@ create table prediction_results (
   settled_at timestamptz not null default now(),
   created_at timestamptz not null default now()
 );
+
+-- Row-level security (RLS: database rules on who can read or write each row)
+-- is on for every table. Nobody may write through the public API; our server
+-- jobs write with the service role key, which never reaches the browser.
+-- No public rules: predictions and results are read by our server only.
+alter table predictions enable row level security;
+alter table prediction_results enable row level security;

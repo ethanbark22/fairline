@@ -1,2210 +1,286 @@
-AI Sports Betting Research Platform — Product & Technical Specification
-Master Brief for Claude Code
+In plain English
+
+We are building a website where you pick a football match, and it shows what the bookmakers' prices imply, what our own maths says, whether there is a gap in your favour, and how much to trust that answer. It never takes bets and never promises wins.
+
+Where the numbers come from. A paid odds service supplies bookmaker prices. Our own code turns them into probabilities. Claude only writes the explanation and points out risks; it does not make up the numbers.
+What it costs. About $30 a month for odds data (only once the model has proved itself), plus roughly one or two US cents each time someone runs an analysis.
+What you do. Create a few accounts, paste in two keys, approve the changes Claude Code proposes, and check that the screens look right.
+What we build first. One league, one type of bet, working end to end. Everything else waits until that works.
+What could stop a public launch. Data licence questions and UK gambling advertising rules. These need proper advice, not just code.
+
+Words you will keep seeing
 
-Document purpose: This is the master product brief for building a consumer-facing sports betting research and analytics platform. Treat this as the source of truth for architecture, product direction, MVP scope, data strategy, AI behaviour, monetisation, and technical standards.
+Term	What it means
+Repo	The project's folder of code stored on GitHub, with a full history of changes
+Branch and pull request (PR)	A safe copy where Claude Code makes changes; the PR is a proposal you approve before it joins the real code
+API	A way for our app to ask another service for data, such as bookmaker prices
+API key	A secret password that lets our app use that service; never share it or paste it in public
+Environment variable	A safe place to store a key so it is not written in the code
+Database (Supabase)	Where all our information is stored: matches, prices, saved predictions, users
+Migration	A numbered instruction that sets up or changes the database tables
+Cron job	A task that runs by itself on a timer, like fetching new prices every 30 minutes
+Deploy (Vercel)	Putting the latest version of the site live on the internet
+Odds and implied probability	A price of 2.00 means the bookmaker thinks there is about a 50% chance; higher prices mean lower chances
+Edge	Our estimated chance minus the bookmaker's implied chance; positive means possible value, not a sure win
+Calibration	Checking whether things we call 70% likely really happen about 70% of the time
+Summary and decisions
 
-1. Product Vision
+We build a greenfield Next.js + Supabase app and prove one loop first: Premier League match winner (1X2), from cached bookmaker odds to a Claude-written analysis stored as an immutable prediction. Nothing else ships until that loop works.
 
-Build a polished consumer-facing web platform that looks and feels similar to a modern sports betting site, but does not accept bets or hold customer funds in the MVP.
+Decision	Choice	Why
+Starting point	Fresh Next.js (TypeScript, Tailwind, shadcn/ui) repo	No existing repo was connected; wire to Vercel and Supabase once confirmed
+First slice	Premier League, 1X2 (home / draw / away)	The example in the brief; three outcomes, deep bookmaker coverage
+Baseline model	Elo-style ratings feeding a Poisson goals model	Transparent, testable, and calibratable before any ML
+Odds source	The Odds API behind an OddsProvider interface	Swappable later for SportsDataIO or Sportradar
+Claude's role	Explains and challenges; never computes probability, edge or confidence	Per the brief: numbers come from the model and confidence engine
+Positioning	Research and analysis only, 18+, no bets accepted	Keeps the MVP outside sportsbook licensing
 
-The platform helps users research bets before placing them elsewhere.
+Three things I am assuming and will flag again where they matter: scheduled worker routes on Vercel or Supabase (no Redis/BullMQ yet) are enough for ingestion at MVP scale, football match stats come from a free or low-cost source rather than a paid enterprise feed, and the first launch market is the UK.
 
-Core proposition:
+Budget-first approach (overrides the brief where they differ)
 
-Build your bet. Analyse it. Understand the probability, value, evidence and risks before you place it.
+We spend nothing until the model has proved itself, then add costs one at a time as real users appear. Prices are from the Vercel Hobby and Supabase pages, read 24 September 2026.
 
-The product should combine:
+Item	Cost while building	Cost once live
+GitHub private repo	Free	Free
+Vercel	Free on Hobby, which is limited to non-commercial personal use	From $20/month on Pro, needed once you charge anyone
+Supabase	Free: 500 MB, but projects pause after a week of inactivity	From $25/month on Pro, for backups and no pausing
+The Odds API	Free plan: 500 credits/month, enough to test lightly	$30/month for the 20,000-credit plan
+Claude analysis (Anthropic API)	Prepay a small balance (about $5 to $10) and set a spending cap	About 1 cent per analysis
+Football results data	Free tier or free historical files	Confirm commercial terms before launch
 
-live/current bookmaker odds
-sports statistics
-historical data
-injuries and lineups
-relevant news/context
-quantitative probability models
-market-implied probability
-expected value / edge
-AI research and explanation
-accumulator analysis
-confidence classification
-bookmaker price comparison
-historical prediction tracking
+Your own Claude plan, which powers Claude Code, is separate and not counted here.
 
-The AI must not simply hallucinate a prediction. Quantitative facts should come from structured data and/or clearly identified sources. Claude should act primarily as a research analyst, critic and explanation layer, sitting on top of a quantitative data/model pipeline.
+The order we spend money in
 
-The long-term vision is a serious sports betting research terminal for consumers, potentially expanding into subscriptions, affiliate revenue, alerts, premium research, and eventually B2B/API products.
+Build and test everything on free tiers, using free historical results and odds to test the model.
+Run the backtest, which replays past seasons to see how the model would have done. This is the go or no-go point.
+Only if the model holds up, pay $30 for live odds.
+Launch free, with no payments system. Take Stripe and paid tiers only once people ask for more.
+Move Vercel and Supabase to Pro at the moment you start charging, not before.
+
+Changes to the brief
+
+Brief says	Change to	Why
+Build Stripe, tiers and credits in Phase 8	Free launch first; keep a simple free analysis limit only	No revenue to protect yet, and payments code is costly to build and maintain
+Sentry, PostHog, Redis, BullMQ early	Leave out until there are real users	Each adds cost or complexity for no MVP benefit
+Five sports, many markets	One league and one market until the loop works	Every extra market multiplies odds credits and testing
+Model shown as finding value	Add the bookmakers' average price as a model input, and treat the backtest as the judge	See the warning below
+
+A plain warning. Bookmaker prices on football match results are already very accurate. A simple ratings model will usually land close to the market, or slightly worse, so early edge numbers will often sit near zero. That is normal, and the honest result to show. The product's real value is clear explanations, price tracking and a transparent record of past predictions, not a promise of finding value every time. The backtest tells us early whether the model adds anything, before you pay for live data.
+
+Architecture
 
-2. Important Product Positioning
+Users never touch an upstream sports API: scheduled workers pull, validate and normalise data into Postgres, and the app reads only from our own tables and cache.
 
-Do NOT position the product as:
+Odds APIfixtures + odds
+Cron workersvalidate + normalise
+Stats sourceresults + ratings
+Supabase Postgresappend-only snapshots
+Model layerElo + Poisson
+Value + confidencedeterministic
+Research packet
+Claudestructured JSON
+Prediction ledger+ analysis cache
+Next.js app
 
-a magic AI tipster
-guaranteed winners
-a system that can reliably make people money
-an AI that knows the future
-a gambling replacement or source of financial security
+Read left to right: only the workers talk to providers, and Claude sits after the numbers are already fixed.
 
-Position it as:
+Stack. Next.js App Router with TypeScript, Tailwind and shadcn/ui on Vercel; Supabase Postgres, Auth and row-level security; the Anthropic API for analysis; Stripe later. Ingestion runs as worker routes protected by a shared secret, which is enough at MVP volume. The scheduler depends on your Vercel plan: Hobby cron jobs run at most once a day, Pro allows once a minute. If you are on Hobby, Supabase pg_cron calling the routes is the no-cost alternative. Redis and BullMQ are deferred until polling load or job retries justify them.
+
+Code layout. Provider and model code sits behind interfaces so nothing in the UI or API depends on a specific vendor.
 
-AI-powered sports betting research and analysis.
+Module	Responsibility
+lib/providers/odds	OddsProvider interface; OddsApiProvider first, others later
+lib/providers/stats	SportsStatsProvider, InjuryProvider, NewsProvider interfaces
+lib/ingest	Zod-validated fetch, entity mapping, snapshot writes, failure logging
+lib/models	PredictionModel interface; FootballMatchModel v1
+lib/value	Implied probability, margin removal, edge, EV, minimum price
+lib/confidence	Deterministic 0-100 score and LOW / MEDIUM / HIGH label
+lib/ai	Research packet builder, prompt, Claude call, output schema validation
+lib/credits	Ledger-based usage credits with idempotency keys
+app/api/*	Public endpoints; internal worker routes are separate and secret-guarded
 
-The core UI should distinguish between:
+Caching. Current odds live in a current_odds view or table refreshed by the worker, so ten users or ten thousand read the same row. Analyses are cached by a hash of event, market, selection, price bucket, research snapshot and model version; a cache hit costs the user credits but not a Claude call. Claude is called only on an analysis request, never on a page view.
 
-Probability
+Polling. Fixture and odds cadence scales with kickoff proximity, using the quota-free events endpoint to detect what is upcoming before spending credits on odds. The exact schedule and its credit maths are in the cost section.
 
-The model's estimated probability that the selection wins.
+External APIs and licensing
 
-Market probability
+The Odds API covers everything the first slice needs for about $30/month, but its terms include a clause we must clear before launch (see below). Details are from the pricing page, the v4 docs and the terms, read 23 September 2026.
 
-The probability implied by the current price, accounting for the relevant market assumptions.
+The Odds API, endpoints we use
 
-Edge / Value
+Endpoint	Use in MVP	Credit cost
+GET /v4/sports	Confirm soccer_epl is in season	Free
+GET /v4/sports/soccer_epl/events	Fixture list and kickoff times; detect new or changed events	Free
+GET /v4/sports/soccer_epl/odds?regions=uk&markets=h2h	Slice 1: 1X2 prices from UK bookmakers for all upcoming games in one call	1 (markets x regions)
+GET /v4/sports/soccer_epl/odds?markets=h2h,spreads,totals	Later expansion: handicap and totals	3 per region
+GET /v4/sports/soccer_epl/events/{id}/odds	Extended markets (draw_no_bet, btts, player props) per event	Per market x region, per event
+GET /v4/sports/soccer_epl/scores	Settlement results	1 to 2
+Historical odds endpoints	Backtest and closing-line data	10 x markets x regions
 
-The difference between model probability and market-implied probability, with proper consideration of bookmaker margin where applicable.
+Plans. Free is 500 credits/month; $30 gives 20,000, $59 gives 100,000, $119 gives 5M. Historical odds need a paid plan. Extended markets such as player props are only on the per-event endpoint, so they are expensive to poll across a full fixture list. That is why the brief's rule holds: we claim a market only after we have seen it supplied reliably.
 
-Confidence
+Sports statistics (needed for the model). Match results, goals and fixtures for the Elo and Poisson baseline. Candidates:
 
-How reliable the system considers the analysis/probability estimate, based on measurable factors such as model calibration, data quality, edge, agreement between models, lineup certainty, market stability, sample size and uncertainty.
+Source	Notes	Status
+football-data.org	Free tier (12 competitions, 10 calls/min); paid tiers from EUR 12 to 199/month	Confirm Premier League is on the free tier and commercial terms
+football-data.co.uk	Free historical CSVs of results with odds columns	Could not be fetched during research; verify terms before using
+The Odds API scores	Results for settlement only, no team stats	Use for settlement, not modelling
 
-Confidence is NOT simply Claude saying "I'm 90% confident."
+Injuries, lineups and news are deliberately left out of slice 1; the data-quality label will show LIMITED until a provider is chosen for them.
 
-3. MVP Business Model
+Licensing items to resolve, tracked in DATA_PROVIDERS.md. The Odds API terms permit display in an app, indefinite storage, derived calculations and model training. Two clauses need a legal read: the display permission applies "provided the data isn't the primary product being sold", and there is a ban on reselling data as a standalone product. Our subscription sells analysis, but odds are shown prominently, and the Elite bookmaker-comparison tier gets close to that line. The terms also expect responsible gambling messaging. I found no rules on bookmaker names or logos, or affiliate links, so we must ask the provider in writing. Rate limits were not stated on the pages I read.
 
-The initial product should NOT accept bets.
+Database schema and migrations
 
-Users build a betslip/accumulator and receive analysis. If appropriate and legally/commercially permitted, bookmaker affiliate links can eventually allow users to click through to a bookmaker.
+The schema follows the brief's conceptual list, delivered in five migrations so slice 1 needs only the first four. Two rules are enforced in the database, not just in code: odds history is append-only, and predictions cannot be edited after insert.
 
-Potential revenue streams:
+Migration	Tables	Purpose
+0001_reference	sports, competitions, teams, players, bookmakers, provider_mappings	Canonical UUIDs plus (provider, provider_entity_id, entity_type) -> internal_id so no fuzzy name matching at analysis time
+0002_events_odds	events, event_participants, markets, market_selections, odds_snapshots, view current_odds	Fixtures and append-only price history
+0003_model	team_ratings, model_versions, model_runs, feature_snapshots, research_snapshots	Ratings and reproducible inputs for every run
+0004_ledger	predictions, prediction_legs, prediction_results, analysis_cache	Immutable prediction record, settlement and cached Claude output
+0005_users	profiles, subscriptions, usage_credits, credit_transactions, betslips, betslip_legs, saved_picks, alerts	Accounts, credits and betslip; built later
 
-Subscription plans
-Bookmaker affiliate revenue
-Premium research/picks
-Alerts
-Eventually B2B/API access
+The two enforcement rules, in SQL:
 
-Initial pricing hypothesis:
+sql
+create table odds_snapshots (
+  id           bigint generated always as identity primary key,
+  event_id     uuid not null references events(id),
+  bookmaker_id uuid not null references bookmakers(id),
+  market_id    uuid not null references markets(id),
+  selection_id uuid not null references market_selections(id),
+  line         numeric,
+  price        numeric(8,3) not null check (price > 1),
+  provider     text not null,
+  captured_at  timestamptz not null default now()
+);
+create index on odds_snapshots (event_id, market_id, captured_at desc);
 
-Free
-£0/month
-3 analyses/month
-Pick of the Day
-basic odds
-basic betslip/accumulator builder
-limited research
-Pro
-£19.99/month
-100 analyses/month
-unlimited betslip building
-accumulator analysis
-player props
-value/edge information
-odds movement
-model probability
-confidence
-AI research
-prediction history
-Elite
-£49.99/month
-500 analyses/month
-everything in Pro
-deeper player props
-advanced statistical breakdowns
-line movement
-bookmaker comparison
-custom filters
-AI bet finder
-personalised daily research
-advanced accumulator analysis
-alerts
-
-These are initial hypotheses, not immutable requirements. Instrument usage and revisit pricing based on real usage.
-
-Do NOT initially offer unlimited AI analysis. Usage limits protect against runaway API costs.
-
-Potential future high-end tier:
-
-~£99/month for ~1,000 analyses
-or ~£199/month for serious power users/syndicates with bulk analysis, API access, custom alerts, exports and advanced data
-4. Cost Principles
-
-The founder already has:
-
-Vercel
-Supabase
-
-Target initial incremental operating budget is approximately £50–£100/month, increasing only when product usage justifies it.
-
-Initial costs should primarily be:
-
-odds API
-sports statistics/data API
-Claude API
-small amounts of infrastructure/software
-
-Do NOT buy expensive enterprise sports-data licensing before validating the product.
-
-Architecture must be designed so that costs do not scale linearly with users unnecessarily.
-
-Critical principle:
-
-Users should consume cached/normalised data wherever possible rather than each triggering separate upstream sports API calls.
-
-Example:
-
-text
-Odds Provider
-     ↓
-Scheduled ingestion
-     ↓
-Supabase/Postgres
-     ↓
-Cached current odds
-     ↓
-Hundreds/thousands of users
-
-Likewise, identical analyses should be cacheable/shared where the underlying event, market, odds and research packet have not materially changed.
-
-5. Sports
-
-Priority sports:
-
-Football / soccer
-Tennis
-NBA
-MLB
-NHL
-
-NFL may be added later if desired.
-
-The platform should be architected so sports are modular rather than hard-coded into one prediction engine.
-
-Each sport should have its own:
-
-data adapters
-feature engineering
-probability/model logic
-market mappings
-confidence rules
-validation/backtesting
-6. Markets
-
-The product should ultimately support:
-
-General
-moneyline / match winner
-spreads / handicaps
-totals / over-under
-Football
-
-Potential markets:
-
-1X2
-draw no bet
-Asian handicap
-spreads
-match totals
-team totals
-BTTS
-corners
-cards
-anytime scorer
-shots
-shots on target
-assists
-other player props where reliable data exists
-Tennis
-match winner
-set handicap
-game handicap
-total games
-player games
-sets
-aces
-double faults
-other supported player props
-NBA
-moneyline
-spread
-game total
-team total
-player points
-rebounds
-assists
-threes
-steals
-blocks
-PRA
-points + rebounds
-points + assists
-other available player combinations
-MLB
-moneyline
-run line
-game total
-first five
-team totals
-pitcher strikeouts
-pitcher outs
-pitcher hits allowed
-batter hits
-total bases
-RBI
-runs
-home runs
-other supported props
-NHL
-moneyline
-puck line
-game total
-team totals
-player points
-player shots
-goalie saves
-other supported props
-
-NFL, if added:
-
-moneyline
-spread
-totals
-passing yards
-rushing yards
-receiving yards
-receptions
-touchdowns
-completions
-attempts
-interceptions
-player combinations
-
-Do not claim a market is supported until the selected data provider actually supplies it reliably.
-
-7. Odds/Data Provider Strategy
-
-Start with a small number of providers.
-
-Primary odds provider candidate: The Odds API
-
-Investigate/use for MVP:
-
-fixtures/events
-bookmaker odds
-moneyline
-spreads
-totals
-selected player props
-historical odds where commercially licensed
-
-Do not assume that "football odds" means every football player prop is available. Provider market coverage varies by league, bookmaker and jurisdiction.
-
-The provider must be evaluated for:
-
-commercial use
-caching/storage rights
-display rights
-historical-data rights
-derived analytics/model rights
-bookmaker-name/logo usage
-affiliate usage
-geographic coverage
-rate limits
-market coverage
-Secondary/statistics provider candidates
-
-Evaluate providers such as:
-
-SportsDataIO
-Sportradar
-other specialist providers as appropriate
-
-SportsDataIO can potentially provide:
-
-player/team statistics
-injuries
-lineups
-odds
-player props
-historical information
-line movement
-
-Sportradar is a potential future enterprise-grade provider for broader bookmaker/market/player-prop coverage.
-
-Do not commit to expensive enterprise licensing before MVP validation.
-
-8. Data Licensing
-
-This is a major business requirement.
-
-For every provider, verify contractually whether the product is allowed to:
-
-display data publicly
-use data commercially
-store/cache data
-retain historical snapshots
-train statistical/ML models
-create derived analytics
-show bookmaker names
-show bookmaker logos
-show player names
-show team/competition names
-use affiliate links
-redistribute derived data
-operate in UK/US/other markets
-use the data for betting recommendations
-expose derived data through an API
-
-Do not assume API access equals public display/redistribution rights.
-
-Track all data sources and licence terms in a DATA_PROVIDERS.md document.
-
-9. Sports Data Required
-
-The platform needs four main data categories.
-
-A. Odds
-bookmaker
-market
-selection
-line
-price
-timestamp
-opening price
-current price
-closing price where available
-bookmaker consensus
-market movement
-B. Sports statistics
-team stats
-player stats
-historical performance
-advanced metrics
-opponent strength
-splits
-home/away
-surface where applicable
-rest
-schedule
-pace/tempo
-etc.
-C. Context/research
-injuries
-suspensions
-confirmed/probable lineups
-starting pitchers
-starting goalies
-expected minutes
-rotation information
-official team announcements
-press conferences
-relevant reputable news
-weather where relevant
-travel/fatigue
-schedule congestion
-D. Results/settlement
-
-Every published prediction must eventually be linked to:
-
-event result
-market result
-selection result
-win/loss/push/void
-closing price
-10. Historical Data and Prediction Ledger
-
-This is essential.
-
-Every prediction must be recorded before the event begins and become immutable.
-
-Minimum prediction record:
-
-text
-prediction_id
-timestamp_created
-event_id
-sport
-competition
-market
-selection
-line
-bookmaker
-price_at_prediction
-model_probability
-market_probability
-edge
-confidence
-model_version
-data_snapshot_id
-research_snapshot_id
-reasoning
-result
-closing_price
-settlement_timestamp
-
-Never rewrite historical predictions when:
-
-odds move
-injury news changes
-lineup changes
-the model changes
-Claude changes its opinion
-
-The original prediction must remain exactly as published.
-
-This is required for:
-
-performance tracking
-calibration
-backtesting
-credibility
-transparent historical reporting
-future regulatory/advertising review
-11. Database
-
-Use PostgreSQL via the existing Supabase project.
-
-Initial conceptual schema:
-
-text
-sports
-competitions
-teams
-players
-
-events
-event_participants
-
-bookmakers
-
-markets
-market_selections
-odds_snapshots
-
-team_stats
-player_stats
-injuries
-lineups
-weather
-news_articles
-
-predictions
-prediction_legs
-prediction_results
-
-model_versions
-model_runs
-feature_snapshots
-research_snapshots
-
-users
-subscriptions
-usage_credits
-betslips
-betslip_legs
-saved_picks
-alerts
-
-Important:
-
-Never overwrite odds history.
-
-Use an append-only odds_snapshots structure:
-
-text
-event_id
-bookmaker_id
-market_id
-selection_id
-line
-price
-timestamp
-
-This enables:
-
-line movement
-opening/current/closing comparison
-historical analysis
-backtesting
-closing-line value
-market research
-12. Entity Normalisation
-
-Different providers may identify the same entity differently.
-
-Example:
-
-text
-Manchester United
-Man United
-Manchester Utd
-MUN
-
-The system needs canonical internal IDs.
-
-Create:
-
-text
-showguy_team_id
-showguy_player_id
-showguy_event_id
-
-Then maintain provider mappings.
-
-Example:
-
-text
-provider
-provider_entity_id
-internal_entity_id
-entity_type
-
-This is critical when joining:
-
-odds
-stats
-injuries
-news
-lineups
-results
-
-Do not rely on fuzzy string matching during every analysis.
-
-13. Architecture
-
-Recommended initial stack:
-
-Frontend
-Next.js
-TypeScript
-Tailwind CSS
-shadcn/ui
-Backend
-Next.js API routes/server actions initially
-TypeScript
-Database
-Supabase/PostgreSQL
-AI
-Claude API
-Statistical modelling
-Start with TypeScript/simple statistical models if sufficient
-Add Python modelling services when genuinely needed
-Background jobs
-Redis + BullMQ or equivalent
-scheduled data ingestion
-odds refresh
-research ingestion
-result settlement
-model evaluation
-Hosting
-existing Vercel
-existing Supabase
-add worker hosting only when necessary
-Analytics
-PostHog or equivalent
-Error tracking
-Sentry or equivalent
-Authentication
-Supabase Auth
-Payments
-Stripe
-
-Do not over-engineer the MVP.
-
-14. Data Ingestion Architecture
-
-Do NOT fetch upstream sports APIs directly from every user request.
-
-Preferred architecture:
-
-text
-External APIs
-     ↓
-Scheduled ingestion workers
-     ↓
-Validation
-     ↓
-Normalisation
-     ↓
-PostgreSQL
-     ↓
-Cache
-     ↓
-Application
-
-For odds:
-
-text
-Odds provider
-      ↓
-Poll/scheduled job
-      ↓
-Normalise bookmaker/market/selection
-      ↓
-Store snapshot
-      ↓
-Update current-odds cache
-
-Use appropriate polling frequencies based on:
-
-event proximity
-market importance
-API quota
-live vs pre-match status
-
-Do not consume live-level frequency when the product only needs pre-match data.
-
-15. AI Architecture
-
-The core architecture should be:
-
-text
-             SPORTS DATA
-                  │
-       ┌──────────┼───────────┐
-       ↓          ↓           ↓
-     ODDS        STATS       NEWS
-       │          │           │
-       └──────────┼───────────┘
-                  ↓
-           NORMALISATION
-                  ↓
-          FEATURE ENGINEERING
-                  ↓
-       SPORT-SPECIFIC MODELS
-                  ↓
-             PROBABILITY
-                  ↓
-           VALUE CALCULATION
-                  ↓
-          CONFIDENCE ENGINE
-                  ↓
-                CLAUDE
-                  ↓
-         HUMAN-READABLE RESULT
-
-Claude should NOT be responsible for inventing or calculating core numerical facts when structured data is available.
-
-16. Quantitative Model Layer
-
-For every market:
-
-Collect structured data
-Run sport/market-specific model
-Produce estimated probability
-Calculate market-implied probability
-Calculate edge/value
-Assess uncertainty
-Pass structured research packet to Claude
-
-Example:
-
-text
-Model probability: 0.618
-Market implied probability: 0.581
-Edge: +0.037
-
-The exact probability methodology must be documented.
-
-Possible modelling approaches:
-
-Elo
-logistic regression
-Poisson/negative binomial for football scoring
-player projection models
-Bayesian models
-gradient boosting
-simulation
-ensemble models
-
-Do not immediately build a complex ML model. Start with a transparent baseline and prove calibration.
-
-17. Confidence Engine
-
-Confidence should be a separate deterministic/scientific layer.
-
-Potential factors:
-
-text
-Model calibration
-Model-market agreement
-Estimated edge
-Data completeness
-Lineup certainty
-Injury uncertainty
-Market liquidity
-Price freshness
-Historical sample size
-Cross-model agreement
-Prediction variance
-
-Potential output:
-
-text
-confidence_score: 0-100
-confidence_label: LOW | MEDIUM | HIGH
-
-Traffic-light UI:
-
-GREEN = HIGH
-AMBER = MEDIUM
-RED = LOW
-
-The thresholds must be documented and later validated against historical performance.
-
-Do not simply map:
-
-70% probability = HIGH
-50% probability = MEDIUM
-
-Probability and confidence measure different things.
-
-18. Critical Distinction: Probability vs Confidence vs Value
-
-Example:
-
-Bet A
-
-Model probability = 90% Odds = 1.08
-
-Very high probability does not necessarily mean good value.
-
-Bet B
-
-Model probability = 52% Odds = 2.30
-
-Lower probability, but potentially much greater value.
-
-Therefore the UI should always show:
-
-text
-Probability
-Market probability
-Edge
-Confidence
-
-Do not collapse them into one "AI score."
-
-19. Claude Research Layer
-
-Claude's role:
-
-Research analyst
-
-Summarise relevant evidence.
-
-Contrarian
-
-Actively search for evidence that could invalidate the pick.
-
-Context analyst
-
-Identify:
-
-injuries
-lineups
-schedule issues
-tactical matchup
-weather
-fatigue
-unusual market movement
-Explanation layer
-
-Explain why the model reached its result.
-
-Claude should not override structured data without explicitly identifying why.
-
-20. Research Packet
-
-Instead of sending Claude a blank question, construct a structured packet.
-
-Example:
-
-text
-EVENT
-Arsenal vs Manchester City
-Premier League
-22 September 2026
-
-MARKET
-Arsenal +1.5
-Current odds: 1.72
-
-MODEL
-Probability: 61.8%
-Market probability: 58.1%
-Edge: +3.7%
-
-TEAM DATA
-...
-...
-
-INJURIES
-...
-...
-
-LINEUPS
-...
-...
-
-RECENT FORM
-...
-...
-
-MARKET MOVEMENT
-Opening: 1.88
-Current: 1.72
-
-CONTRARY EVIDENCE
-...
-
-Then ask Claude to:
-
-evaluate the evidence
-identify missing/contradictory information
-challenge the model
-summarise the key factors
-explain the main risks
-return structured JSON
-21. Structured Claude Output
-
-Do not depend on parsing free-form prose.
-
-Require structured output such as:
-
-json
-{
-  "probability": 0.618,
-  "confidence_score": 82,
-  "confidence_label": "HIGH",
-  "edge": 0.037,
-  "key_factors": [],
-  "contrary_factors": [],
-  "injury_risk": "LOW",
-  "lineup_risk": "MEDIUM",
-  "market_risk": "LOW",
-  "price_threshold": 1.68,
-  "summary": "",
-  "failure_scenarios": []
-}
-
-Validate the schema before displaying anything.
-
-22. Price Threshold
-
-A useful feature:
-
-Minimum acceptable price
-
-Example:
-
-text
-Model probability: 61.8%
-Recommended minimum price: 1.68
-Current best price: 1.72
-
-If the market falls below the threshold:
-
-text
-VALUE NO LONGER QUALIFIES
-
-This prevents the system from treating a pick as permanently good when the price has materially changed.
-
-23. Accumulator Builder
-
-The core user journey:
-
-text
-Browse events
-      ↓
-Choose market
-      ↓
-Add selection
-      ↓
-Betslip
-      ↓
-Build accumulator
-      ↓
-Analyse Acca
-
-Each leg should display:
-
-selection
-line
-best bookmaker price
-model probability
-market probability
-edge
-confidence
-24. Accumulator Analysis
-
-This is potentially one of the platform's strongest differentiators.
-
-For an accumulator:
-
-text
-Arsenal ML
-Alcaraz ML
-Celtics -4.5
-Madrid O1.5
-
-Analyse:
-
-each leg independently
-combined probability
-combined implied probability
-estimated value
-weakest leg
-strongest leg
-uncertainty
-correlation
-price sensitivity
-25. Correlation Detection
-
-Do NOT assume all accumulator legs are independent.
-
-Examples:
-
-text
-Arsenal ML
-Arsenal O2.5
-Arsenal player to score
-
-These may be correlated.
-
-NBA:
-
-text
-Team -6.5
-Team total O115.5
-Star player O points
-
-Again potentially correlated.
-
-The system should detect:
-
-same event
-same team
-same player
-logically linked outcomes
-same-game correlation
-
-Do not multiply independent probabilities blindly.
-
-Eventually develop sport-specific correlation models.
-
-If correlation cannot be estimated reliably, clearly state that uncertainty rather than pretending the combined probability is precise.
-
-26. Product Features
-MVP
-Home
-today's events
-featured picks
-Pick of the Day
-Acca of the Day
-Sports pages
-football
-tennis
-NBA
-MLB
-NHL
-Event page
-fixture
-markets
-odds
-bookmaker comparison
-statistics
-AI analysis
-Betslip
-singles
-accumulator
-remove/add legs
-combined odds
-Analyse
-probability
-implied probability
-edge
-confidence
-reasons
-risks
-price threshold
-User account
-saved bets
-analysis history
-usage credits
-subscription
-27. Pick of the Day
-
-Daily automated selection.
-
-Display:
-
-text
-AI PICK OF THE DAY
-
-Selection
-Arsenal +1.5
-
-Best price
-1.72
-
-Model probability
-61.8%
-
-Market probability
-58.1%
-
-Edge
-+3.7%
-
-Confidence
-HIGH
-
-Why
-...
-
-Risks
-...
-
-Every Pick of the Day must be stored as a historical prediction before the event.
-
-28. Acca of the Day
-
-Potentially provide:
-
-AI Acca
-
-Optimised around value/edge.
-
-Conservative Acca
-
-Optimised around high individual probabilities.
-
-Do not imply that an accumulator is "safe" or guaranteed.
-
-29. Bet Finder
-
-Future feature:
-
-User selects:
-
-text
-Sport
-League
-Minimum confidence
-Minimum edge
-Odds range
-Market type
-
-System searches available markets and returns qualifying opportunities.
-
-Example:
-
-Find 3 football bets with HIGH confidence and at least 4% model edge.
-
-This should be implemented as a search/ranking/filtering problem, not as Claude inventing bets.
-
-30. Odds Shopping
-
-For each selection:
-
-text
-Bet365      1.80
-Betway      1.83
-William Hill 1.78
-Ladbrokes   1.85
-
-Display:
-
-Best available price: 1.85
-
-Eventually use affiliate links where commercially/licensing appropriate.
-
-31. Line Movement
-
-Store historical snapshots.
-
-Display:
-
-text
-Opening: 1.95
-Current: 1.82
-Movement: -6.7%
-
-Allow Claude to explain relevant movement without claiming that movement itself proves the outcome.
-
-32. Performance Dashboard
-
-Eventually show:
-
-predictions
-win rate
-ROI
-yield
-closing-line value
-calibration
-performance by sport
-performance by market
-performance by odds range
-performance by confidence
-performance by model version
-
-Do NOT cherry-pick only winning picks.
-
-All historical performance reporting must have a consistent methodology.
-
-33. Calibration
-
-A major long-term differentiator.
-
-If the model says:
-
-70% probability
-
-then across a sufficiently large historical sample, approximately 70% should win.
-
-Track calibration curves.
-
-For example:
-
-text
-Predicted 60-65%
-Actual result rate: X%
-
-Predicted 65-70%
-Actual result rate: X%
-
-Predicted 70-75%
-Actual result rate: X%
-
-Confidence labels should eventually be validated against actual historical performance.
-
-34. Backtesting
-
-Every model change must be evaluated against historical data.
-
-Avoid look-ahead bias.
-
-At prediction time, the model must only use information that would actually have been available at that timestamp.
-
-Never allow:
-
-future closing odds
-later injury information
-final lineups unavailable at prediction time
-future results
-post-event news
-
-to leak into the historical prediction.
-
-Track:
-
-model version
-data timestamp
-features used
-prediction timestamp
-35. Model Versioning
-
-Every prediction must reference a model version.
-
-Example:
-
-text
-football_match_model_v1.0
-nba_spread_model_v1.2
-tennis_match_model_v0.8
-
-When changing a model:
-
-create a new version
-don't rewrite previous predictions
-compare versions using historical backtests
-36. User Experience
-
-Visual direction:
-
-Modern sportsbook + TradingView + ESPN + premium analytics dashboard
-
-Not a generic chatbot.
-
-Core visual hierarchy:
-
-text
-Selection
-↓
-Best Price
-↓
-Probability
-↓
-Value
-↓
-Confidence
-↓
-Evidence
-↓
-Risks
-
-Traffic-light system should be instantly understandable.
-
-Avoid excessive walls of AI text.
-
-37. Suggested Event Card
-text
-ARSENAL vs MAN CITY
-
-Arsenal +1.5
-Best Price 1.72
-
-Model Probability
-61.8%
-
-Market Probability
-58.1%
-
-Edge
-+3.7%
-
-🟢 HIGH CONFIDENCE
-
-[Analyse]
-[Add to Acca]
-38. Analysis Page
-
-Suggested layout:
-
-text
-ARSENAL +1.5
-
-🟢 HIGH CONFIDENCE
-
-61.8%
-Model Probability
-
-58.1%
-Market Probability
-
-+3.7%
-Estimated Edge
-
-1.72
-Best Price
-
-1.68
-Minimum Price
-
-WHY THE MODEL LIKES IT
-- ...
-- ...
-- ...
-
-WHAT COULD GO WRONG
-- ...
-- ...
-- ...
-
-MARKET
-Opening → Current
-
-TEAM DATA
-...
-
-INJURIES
-...
-
-AI RESEARCH
-...
-39. Cost Optimisation
-
-Critical rules:
-
-Cache current odds.
-Cache event research.
-Cache identical analyses.
-Batch data ingestion.
-Avoid calling Claude for every page view.
-Only call Claude when analysis is requested or when material data changes.
-Use cheaper/non-LLM computation for deterministic calculations.
-Keep research packets compact.
-Use structured output.
-Set usage limits per user.
-Rate-limit abuse.
-Monitor token usage per analysis.
-
-The product should know its approximate:
-
-cost per analysis
-cost per active user
-cost per subscriber
-gross margin
-40. Pricing/Usage Architecture
-
-Implement a credit/usage system rather than hardcoding plan limits throughout the application.
-
-Example:
-
-text
-FREE
-3 analyses/month
-
-PRO
-100 analyses/month
-
-ELITE
-500 analyses/month
-
-Potential credit costs:
-
-text
-Single analysis = 1 credit
-Player prop analysis = 1 credit
-Standard acca analysis = 3 credits
-Deep acca analysis = 5 credits
-AI Bet Finder = 3 credits
-Full-day research scan = 5 credits
-
-This is a starting model and should be adjustable.
-
-Important:
-
-show remaining usage
-reset monthly
-handle refunds/failed analyses
-prevent double charging
-log every credit transaction
-maintain audit history
-41. Scaling Economics
-
-Do not assume every user causes equivalent API costs.
-
-Sports data should be shared.
-
-Example:
-
-text
-10,000 users
-        ↓
-same cached Arsenal odds
-        ↓
-one upstream data fetch
-
-AI analysis can also be shared when:
-
-same event
-same market
-same price state
-same relevant research snapshot
-same model version
-
-Potential future architecture:
-
-text
-Event Research Cache
-+
-Market Analysis Cache
-+
-User-specific explanation layer
-
-This allows much better margins.
-
-42. Target Unit Economics
-
-Initial target:
-
-A £19.99/month subscriber should ideally cost only a small fraction of subscription revenue to serve.
-
-Aim to keep total variable cost per average subscriber comfortably below ~£5/month initially, while recognising that heavy users will cost more.
-
-Track:
-
-text
-Revenue/user
-AI cost/user
-Data cost/user
-Infrastructure/user
-Payment fees
-Affiliate revenue/user
-Gross margin
-
-Do not assume these numbers until actual usage data exists.
-
-43. Payments
-
-Use Stripe for subscriptions.
-
-Implement:
-
-Free
-Pro
-Elite
-subscription status
-cancellation
-renewal
-failed payment handling
-usage entitlement
-webhooks
-customer portal
-
-Do not store card information yourself.
-
-44. Affiliate Revenue
-
-Potential future flow:
-
-text
-Selection
-↓
-Best bookmaker price
-↓
-[View at bookmaker]
-↓
-Affiliate tracking
-
-Requirements:
-
-bookmaker affiliate agreements
-permitted promotional language
-responsible gambling requirements
-accurate price display
-timestamped price data
-appropriate disclosure
-
-Never show an outdated price as though it is current.
-
-45. UK/Gambling Compliance
-
-The initial product should be an analytics/research platform and should not accept bets.
-
-Before launch, obtain appropriate legal advice regarding:
-
-UK gambling law
-Gambling Commission requirements
-affiliate arrangements
-gambling advertising
-ASA/CAP rules
-consumer protection
-terms and conditions
-privacy/GDPR
-age restrictions
-responsible gambling messaging
-geographic availability
-data licensing
-
-Design the product for 18+ users.
-
-Do not market it as a solution to financial problems or as guaranteed income.
-
-Do not use:
-
-"guaranteed winner"
-"risk-free"
-"easy money"
-"make your salary"
-"can't lose"
-similar misleading claims
-
-Do not claim that AI can guarantee betting outcomes.
-
-46. Privacy/Security
-
-Implement:
-
-secure authentication
-row-level security in Supabase
-server-side API keys
-never expose provider API keys to browser
-encrypted secrets
-rate limiting
-audit logs
-secure Stripe webhook validation
-abuse prevention
-GDPR-compatible privacy practices
-account deletion
-data export where required
-minimal personal data collection
-47. Observability
-
-Track:
-
-Technical
-API failures
-latency
-database errors
-queue failures
-AI failures
-malformed provider data
-Product
-analyses/day
-analyses/user
-most analysed sports
-most analysed markets
-conversion
-free → paid
-subscription churn
-average credits consumed
-affiliate clicks
-retention
-Model
-predictions
-results
-calibration
-ROI/yield
-CLV
-model drift
-48. Abuse Protection
-
-Users should not be able to:
-
-automate thousands of analysis requests
-bypass credit limits
-scrape the entire odds database
-use the platform as an unofficial odds API
-repeatedly trigger identical expensive research
-
-Implement:
-
-authentication
-rate limits
-credit checks
-request deduplication
-caching
-bot protection
-server-side validation
-49. API Design
-
-Suggested endpoints:
-
-text
-GET /api/sports
-GET /api/competitions
-GET /api/events
-GET /api/events/:id
-GET /api/events/:id/markets
-GET /api/events/:id/odds
-
-POST /api/analysis
-POST /api/acca/analyse
-GET /api/picks/today
-GET /api/acca/today
-
-POST /api/betslip
-POST /api/betslip/legs
-DELETE /api/betslip/legs/:id
-
-GET /api/user/usage
-GET /api/user/predictions
-
-POST /api/stripe/webhook
-
-Data ingestion should use separate internal worker endpoints/services rather than exposing provider operations publicly.
-
-50. Analysis Endpoint Flow
-
-Example:
-
-text
-POST /api/analysis
-
-Input:
-event_id
-market_id
-selection_id
-requested_depth
-
-Backend:
-
-text
-1. Validate user
-2. Validate credit balance
-3. Load current market
-4. Load latest odds
-5. Load statistics
-6. Load injuries
-7. Load lineups
-8. Load relevant research
-9. Run quantitative model
-10. Calculate market probability
-11. Calculate edge
-12. Calculate confidence
-13. Build research packet
-14. Check analysis cache
-15. If required, call Claude
-16. Validate structured Claude output
-17. Store analysis
-18. Deduct credits
-19. Return result
-
-Credit should only be consumed once the analysis successfully completes, according to the chosen billing policy.
-
-51. Acca Endpoint Flow
-text
-POST /api/acca/analyse
-
-Input:
-legs[]
-
-Backend:
-
-text
-1. Validate every leg
-2. Load current prices
-3. Load each model probability
-4. Identify correlation
-5. Calculate individual metrics
-6. Estimate combined probability where methodology supports it
-7. Calculate combined market odds
-8. Calculate value
-9. Identify weakest leg
-10. Identify correlation risks
-11. Send structured packet to Claude
-12. Return analysis
-
-If combined probability cannot be reliably estimated, explicitly show that limitation instead of manufacturing a precise number.
-
-52. AI Prompt Principles
-
-System prompt should enforce:
-
-Never invent statistics.
-Never invent injuries.
-Never invent odds.
-Never invent bookmaker prices.
-Use supplied structured data as authoritative for numerical fields.
-Identify uncertainty.
-Challenge the proposed bet.
-Distinguish fact from interpretation.
-Never claim certainty about an uncertain sports outcome.
-Do not use emotional/persuasive gambling language.
-Explain both supporting and contrary evidence.
-Return the required schema.
-Never override a quantitative result without explaining why.
-53. Research Sources
-
-Prioritise:
-
-official league/team sources
-official injury/lineup sources
-reliable statistical providers
-reputable sports news
-other sources only when necessary
-
-Store:
-
-source URL
-publisher
-publication time
-retrieval time
-title
-relevant extracted content
-source reliability category
-
-Research should be timestamped because sports information changes quickly.
-
-54. News Freshness
-
-A research result from yesterday should not necessarily be treated the same as one from 10 minutes ago.
-
-Store:
-
-text
-published_at
-retrieved_at
-source
-event_id
-player_id/team_id
-
-Use freshness weighting where appropriate.
-
-For example:
-
-confirmed lineup: extremely high relevance
-official injury update: high
-old form article: lower
-generic historical article: potentially irrelevant
-55. Data Quality
-
-Every analysis should have a data-quality state:
-
-text
-EXCELLENT
-GOOD
-LIMITED
-INSUFFICIENT
-
-Examples of problems:
-
-missing lineup
-stale odds
-missing player data
-conflicting injury reports
-insufficient historical sample
-provider outage
-
-If data quality is insufficient, the platform should say so rather than manufacture confidence.
-
-56. Market Availability
-
-The frontend should gracefully handle markets that are unavailable.
-
-Never display:
-
-stale prices
-missing bookmaker data
-unsupported markets
-incorrectly mapped players
-incorrect lines
-
-Every market should have:
-
-provider
-timestamp
-status
-availability
-57. Testing
-
-Write automated tests for:
-
-Data
-provider mapping
-duplicate events
-duplicate markets
-odds updates
-settlement
-Calculations
-implied probability
-edge
-EV
-combined odds
-probability calculations
-confidence calculation
-price threshold
-AI
-structured output validation
-hallucination detection
-missing-data handling
-contradictory evidence
-schema failures
-Payments
-subscription lifecycle
-webhook processing
-credit allocation
-Security
-authentication
-authorisation
-RLS
-API key protection
-rate limits
-58. MVP Development Order
-
-Do NOT attempt everything simultaneously.
-
-Recommended sequence:
-
-Phase 1 — Foundation
-Next.js
-Supabase
-auth
-database schema
-design system
-navigation
-Phase 2 — Sports data
-Odds API integration
-event ingestion
-market ingestion
-bookmaker normalisation
-odds snapshots
-Phase 3 — Betslip
-event browser
-market selection
-betslip
-accumulator builder
-Phase 4 — Quantitative analysis
-probability model baseline
-implied probability
-edge
-confidence engine
-Phase 5 — Claude
-research packet
-Claude integration
-structured JSON
-explanation
-contrary evidence
-Phase 6 — Accumulator
-multi-leg analysis
-correlation detection
-weakest-leg identification
-Phase 7 — Picks
-Pick of the Day
-Acca of the Day
-prediction ledger
-Phase 8 — Subscriptions
-Stripe
-Free/Pro/Elite
-usage credits
-Phase 9 — Performance
-historical results
-calibration
-ROI/yield
-model versioning
-Phase 10 — Scale
-caching
-background jobs
-additional sports
-player props
-alerts
-affiliate integration
-59. What NOT to Build Initially
-
-Avoid:
-
-sportsbook functionality
-deposits/withdrawals
-KYC
-complex live betting
-every possible market
-expensive enterprise data contracts
-huge ML infrastructure
-mobile apps
-social network
-community betting
-complicated portfolio management
-10+ sports
-every bookmaker in every country
-
-First prove:
-
-User sees a bet → clicks Analyse → receives genuinely useful analysis → understands why the system thinks the bet has value/risk → returns to analyse another bet.
-
-60. Initial MVP Sports/Markets
-
-To keep development manageable:
-
-Football
-1X2
-handicap
-totals
-selected player props
-Tennis
-match winner
-game handicap
-totals
-selected props
-NBA
-moneyline
-spread
-total
-selected player props
-
-Then add:
-
-MLB
-NHL
-NFL
-
-once the core system works.
-
-61. Long-Term Moat
-
-Claude is NOT the moat.
-
-The moat should become:
-
-proprietary historical prediction database
-calibrated sport-specific models
-prediction history
-odds movement history
-data normalisation
-correlation engine
-confidence methodology
-user behaviour data
-research archive
-brand
-
-The long-term goal is to have an internal dataset that allows:
-
-"When our system says HIGH confidence under these exact conditions, what has historically happened?"
-
-That is much more valuable than simply saying "Claude thinks this will win."
-
-62. Long-Term Product Expansion
-
-Potential future features:
-
-personalised betting dashboard
-saved leagues/teams/players
-push notifications
-odds movement alerts
-price-threshold alerts
-player injury alerts
-lineup alerts
-automated daily scans
-"find me bets matching my criteria"
-bankroll tracking
-historical model dashboard
-public transparency page
-advanced analytics
-API access
-B2B analytics
-media/publisher widgets
-
-Any future bankroll or betting-tracking features should be designed with responsible gambling considerations.
-
-63. Core Product Philosophy
-
-The platform should be:
-
-Data-first
-
-Facts originate from structured data.
-
-Model-first
-
-Probabilities come from a quantitative methodology.
-
-AI-enhanced
-
-Claude researches, challenges and explains.
-
-Transparent
-
-Users can see why the system reached its conclusion.
-
-Uncertainty-aware
-
-The product explicitly communicates limitations.
-
-Price-aware
-
-A bet is not simply "good"; its price matters.
-
-Historically accountable
-
-Every prediction is stored and evaluated.
-
-Scalable
-
-Data and analyses are cached and shared where possible.
-
-64. First Success Metric
-
-Do not define success as:
-
-"We built an AI betting website."
-
-Define the first milestone as:
-
-A user can select any supported pre-match market, click Analyse, and receive a reliable, explainable result in seconds.
-
-The complete loop must work:
-
-text
-EVENT
-↓
-MARKET
-↓
-ODDS
-↓
-DATA
-↓
-MODEL
-↓
-PROBABILITY
-↓
-EDGE
-↓
-CONFIDENCE
-↓
-CLAUDE RESEARCH
-↓
-EXPLANATION
-↓
-PREDICTION RECORD
-↓
-RESULT
-↓
-MODEL EVALUATION
-65. Claude Code Development Instructions
-
-When implementing this project:
-
-First inspect the repository.
-Do not overwrite existing Vercel/Supabase configuration without checking it.
-Build incrementally.
-Explain architectural decisions briefly before major changes.
-Keep secrets server-side.
-Use environment variables.
-Never hard-code API keys.
-Create database migrations.
-Create seed/test data.
-Write automated tests for critical calculations.
-Keep provider integrations modular.
-Never couple the frontend directly to an external provider.
-Create provider interfaces so providers can be swapped later.
-Create sport-specific model interfaces.
-Use TypeScript types throughout.
-Validate external API responses.
-Log provider failures.
-Handle stale/missing data gracefully.
-Do not claim unsupported market coverage.
-Keep the UI responsive and polished.
-Do not over-engineer infrastructure before it is needed.
-Build a working vertical slice before expanding scope.
-66. Provider Abstraction
-
-Do not write the application so that everything depends directly on The Odds API.
-
-Create interfaces such as:
-
-typescript
-interface OddsProvider {
-  getEvents(): Promise<Event[]>;
-  getMarkets(eventId: string): Promise<Market[]>;
-  getOdds(eventId: string): Promise<OddsSnapshot[]>;
-}
-
-Then:
-
-text
-OddsApiProvider
-SportsDataProvider
-SportradarProvider
-
-can implement the same interface.
-
-This makes future provider changes much easier.
-
-Likewise:
-
-typescript
-interface SportsStatsProvider {}
-interface InjuryProvider {}
-interface NewsProvider {}
-67. Model Abstraction
-
-Create:
-
-typescript
-interface PredictionModel {
-  predict(input: PredictionInput): Promise<PredictionOutput>;
-}
-
-Then:
-
-text
-FootballMatchModel
-TennisMatchModel
-NBASpreadModel
-NBAPlayerPropsModel
-MLBModel
-NHLModel
-
-This allows independent iteration.
-
-68. First Technical Milestone
-
-Before building the full UI, make this work end-to-end with one sport and one market.
-
-Example:
-
-text
-Football
-↓
-Premier League
-↓
-Match winner
-↓
-Odds API
-↓
-Supabase
-↓
-Baseline probability model
-↓
-Market probability
-↓
-Edge
-↓
-Confidence
-↓
-Claude analysis
-↓
-JSON
-↓
-Frontend card
-
-Only after this works should the project expand to additional markets/sports.
-
-69. Example Final API Response
-
-The frontend should eventually receive something conceptually like:
-
-json
-{
-  "selection": {
-    "event": "Arsenal vs Manchester City",
-    "market": "Arsenal +1.5",
-    "best_price": 1.72,
-    "bookmaker": "Example Bookmaker"
-  },
-  "model": {
-    "probability": 0.618,
-    "market_probability": 0.581,
-    "edge": 0.037,
-    "confidence_score": 82,
-    "confidence_label": "HIGH",
-    "minimum_price": 1.68
-  },
-  "research": {
-    "key_factors": [],
-    "contrary_factors": [],
-    "risks": [],
-    "data_quality": "GOOD"
-  },
-  "analysis": {
-    "summary": "",
-    "failure_scenarios": []
-  },
-  "metadata": {
-    "model_version": "football_handicap_v1",
-    "generated_at": "",
-    "odds_timestamp": ""
-  }
-}
-70. Final Product Goal
-
-The finished product should feel like:
-
-A Bloomberg/TradingView-style research terminal for sports bettors, with Claude acting as the analyst.
-
-A user should be able to open it, see today's sports, find a market, add it to a betslip, and immediately understand:
-
-what the market says
-what the model says
-whether there appears to be an edge
-how confident the system is
-why
-what could invalidate the analysis
-what price is required
-how the selection compares with alternatives
-how the system has historically performed
-
-The product should never pretend to know the future.
-
-Its value is in making the user's research process faster, more systematic, more transparent and more data-driven.
-
-Immediate Build Task
-
-Start by creating a detailed technical implementation plan for the MVP.
-
-Before writing large amounts of code:
-
-Inspect the existing Vercel/Supabase project.
-Propose the database schema.
-Propose the application architecture.
-Identify exact external APIs required.
-Identify their current endpoint/market requirements.
-Identify which data can be cached.
-Define the first vertical slice.
-Define environment variables.
-Define migrations.
-Define the first automated tests.
-Define the first UI screens.
-Estimate the expected API/AI cost per analysis.
-Identify any licensing or technical blocker that must be resolved before public launch.
-
-Then implement the project incrementally, starting with the smallest end-to-end working version rather than scaffolding the entire platform at once.
+create function forbid_mutation() returns trigger language plpgsql as $$
+begin raise exception 'table % is append-only', tg_table_name; end $$;
+
+create trigger odds_append_only before update or delete on odds_snapshots
+  for each row execute function forbid_mutation();
+create trigger predictions_immutable before update or delete on predictions
+  for each row execute function forbid_mutation();
+
+Predictions. The predictions table holds every field the brief lists (timestamps, price, model and market probability, edge, confidence, model_version, data_snapshot_id, research_snapshot_id, reasoning). Results and closing price live in the separate prediction_results table, written at settlement, so the original row never changes. A check requires created_at < event.kickoff.
+
+Storage growth. Snapshots are stored only when a price changes, not on every poll, which keeps the table small on the free Supabase plan.
+
+Security. Row-level security is on for every user table. Reference, odds and ledger tables are read-only to the anon role; all writes go through the service role in server code and workers. Seed data: one season of Premier League fixtures and results plus a handful of fake odds snapshots for tests.
+
+First vertical slice
+
+The slice is done when a user opens one Premier League fixture, clicks Analyse, and within about 10 seconds sees probability, market probability, edge, confidence and a Claude explanation, with an immutable prediction row saved. Build it in this order, each step shippable on its own. Per the budget-first approach, the model and backtest (steps 5 and 6) come before paid live odds.
+
+Scaffold and data layer. Next.js app, Supabase client, migrations 0001 to 0004, seed teams, bookmakers and provider_mappings for the 20 Premier League clubs. (Done in the first Claude Code session, along with the value maths.)
+Odds provider. OddsApiProvider implements getEvents and getOdds; every response is parsed with Zod and rejected if malformed. An event whose teams have no mapping goes to a quarantine table and is logged, never fuzzy-matched.
+Ingestion cron. Events are refreshed from the free endpoint every 6 hours. Odds for h2h in region uk are polled every 30 minutes, tightening to every 10 minutes in the last 3 hours before kickoff. A new snapshot row is written only if a price changed.
+Value maths (lib/value). Implied probability is 1 / price. Bookmaker margin is removed by normalising the three outcomes so they sum to 1; a better method (power or Shin) can replace it later behind the same function. Edge is model probability minus margin-free market probability. Minimum price is 1 / (model probability minus a buffer), with the buffer defaulting to 2 percentage points and tunable.
+Football model v1 (football_1x2_v1). Elo ratings from past results (home advantage and K-factor as parameters) give an expected goal difference; a Poisson goals model turns that into home, draw and away probabilities. Ratings update nightly from new results.
+Backtest. Validate with a walk-forward backtest on historical seasons (never using information from after each match) and report log loss and calibration against the bookmakers' closing prices before trusting any output. This is the go or no-go point for paying for live odds.
+Confidence v1. A weighted 0-100 score from data completeness, price freshness, bookmaker agreement, edge size, and games played by each team, mapped to LOW, MEDIUM or HIGH. HIGH is disabled until enough settled predictions exist to check calibration; until then the label caps at MEDIUM and the UI says so.
+Research packet and Claude. Build the compact packet from the brief (event, market, model output, form, market movement, data-quality state). Claude returns the JSON schema from the brief; we validate it with Zod, retry once on failure, and on a second failure return the numbers without narrative and charge no credit.
+Ledger and cache. Insert the prediction before kickoff, store the analysis in analysis_cache under its hash, return the response shape in the brief's section 69.
+Settlement. A nightly job reads final scores, writes prediction_results with win, loss or void and the closing price from the last snapshot before kickoff.
+
+Injuries and lineups are intentionally not in this slice. With no lineup data the data-quality state is LIMITED, and the UI shows that plainly.
+
+Environment, tests and screens
+
+Environment variables. All secrets are server-side only; only the two public Supabase values reach the browser.
+
+Variable	Scope	Purpose
+NEXT_PUBLIC_SUPABASE_URL	Public	Supabase project URL
+NEXT_PUBLIC_SUPABASE_ANON_KEY	Public	Anon key, protected by RLS
+SUPABASE_SERVICE_ROLE_KEY	Server	Workers and ledger writes
+ODDS_API_KEY	Server	The Odds API
+STATS_API_KEY	Server	Results and fixtures provider, once chosen
+ANTHROPIC_API_KEY	Server	Claude analysis
+CLAUDE_MODEL	Server	Model id, so it can change without a deploy
+CRON_SECRET	Server	Authenticates scheduled calls to worker routes
+STRIPE_SECRET_KEY, STRIPE_WEBHOOK_SECRET	Server	Only when paid tiers are added
+SENTRY_DSN, NEXT_PUBLIC_POSTHOG_KEY	Mixed	Error tracking and analytics, only once there are real users
+
+First automated tests (Vitest). Calculations come first because a silent error there corrupts everything downstream.
+
+Area	Cases
+Value maths	Implied probability; margin removal sums to 1; edge sign; minimum price; 1.08 at 90% is low value while 2.30 at 52% is positive (the brief's example)
+Provider mapping	Known alias resolves; unmapped team quarantines; duplicate event from two polls is one event
+Odds ingestion	Unchanged price writes no row; changed price appends; malformed payload rejected and logged
+Model	Probabilities sum to 1; stronger home side has higher home win probability; no use of results after the prediction timestamp
+Confidence	Stale odds lowers score; HIGH is blocked while calibration is unverified
+AI output	Valid JSON passes; missing field, out-of-range probability and prose-wrapped JSON fail; Claude cannot change model probability
+Ledger	UPDATE and DELETE on predictions and odds_snapshots raise; insert after kickoff is rejected
+Security	RLS blocks reading another user's history; worker routes reject a missing CRON_SECRET
+
+First UI screens. Visual direction is sportsbook meets TradingView: dense, dark-friendly, traffic-light confidence, no walls of AI text.
+
+Fixtures list for the Premier League with best 1X2 prices and a timestamp on every price.
+Event page with the three outcomes, bookmaker comparison, price movement and an Analyse button.
+Analysis card in the brief's hierarchy: selection, best price, probability, market probability, edge, confidence, minimum price, why, what could go wrong, data-quality state.
+Sign-in through Supabase Auth with an 18+ confirmation and responsible gambling footer.
+
+Betslip, accumulator, picks and pricing pages come in later phases.
+
+Cost per analysis and monthly budget
+
+A single analysis should cost roughly 1 to 2 US cents in Claude usage, and fixed provider costs land near $30 to $45 a month once live, inside the brief's £50 to £100 target. Token counts below are my estimates until we measure real packets; prices are from the Claude pricing page, read 23 September 2026.
+
+Item	Assumption	Cost
+Single analysis, Sonnet 5	About 2,500 input and 700 output tokens at $2 and $10 per million	About $0.012
+Same with cached system prompt	Cache reads bill at 10% of input rate	About $0.010
+4-leg accumulator analysis	About 8,000 input and 1,500 output tokens	About $0.031
+Cache hit on a shared analysis	No Claude call	$0
+
+Batch processing halves these rates and suits the daily Pick of the Day scan, which is not interactive.
+
+Odds credits. A h2h call for region uk costs 1 credit and returns every upcoming fixture. Polling every 30 minutes plus 10-minute polls in pre-kickoff windows is about 70 calls a day, so roughly 2,100 credits a month, plus about 250 for scores. That exceeds the free 500 credits and fits the $30 plan (20,000 credits) with room to add spreads and totals across two regions (about 13,000 credits a month).
+
+Per-subscriber view. A Pro user spending all 100 credits on single analyses costs about $1.20 in Claude usage; an Elite user spending all 500 costs about $6 against £49.99 of revenue. Both sit below the brief's £5 variable cost target for an average subscriber, and shared caching should push real cost lower.
+
+Monthly fixed cost once live	Estimate
+The Odds API, 20K plan	$30 (about £23)
+Football stats source	Free to EUR 12
+Vercel Pro (needed once charging)	From $20
+Supabase Pro (once live)	From $25
+Sentry and PostHog	Not used at first
+
+Not yet included: Stripe fees, injury and lineup data, and any web-research calls Claude might make.
+
+Launch blockers
+
+None of these stop us building the slice, but each must be closed before the product is public. I am not a lawyer; the legal rows need proper advice, as the brief already says.
+
+Blocker	Why it matters	Action
+Odds API "primary product" clause	Display is allowed only if the data is not the primary product sold	Ask the provider in writing whether our analysis subscription qualifies, especially bookmaker comparison
+Bookmaker names, logos, affiliate links	The terms I read are silent on these	Get written confirmation; log in DATA_PROVIDERS.md
+Stats provider terms	Commercial use and storage not confirmed for football-data.org or football-data.co.uk	Read full terms and pick one before adding form data
+No injury or lineup source	Analyses are capped at data quality LIMITED without it	Evaluate a provider after slice 1
+Calibration unproven	HIGH confidence would be unearned	Keep HIGH disabled until enough settled predictions and a calibration check exist
+UK gambling and advertising rules	Pick of the Day may be treated as tipping; affiliate promotion is regulated	Legal advice on Gambling Commission, ASA and CAP rules, and required responsible gambling wording
+Privacy and age gating	18+ product handling personal data	GDPR review, account deletion and data export, age confirmation at sign-up
+Vercel plan	Hobby is non-commercial only and limits cron to once a day	Move to Pro when charging, or use Supabase pg_cron in the meantime
+
+Marketing copy must avoid guaranteed-win, risk-free and easy-money language throughout, in the product, the emails and any store listings.
+
+Build order and next steps
+Order	Work	Status / needs from you
+1	Next.js scaffold, Supabase migrations 0001 to 0004, seed data, lib/value with tests	Done in the first Claude Code session
+2	Football model v1 and backtest on free historical data	Next; no paid services
+3	Go or no-go on paying for live odds	Your decision, based on the backtest
+4	OddsApiProvider, ingestion routes, snapshots	The Odds API key
+5	Confidence v1, research packet, Claude call, ledger	Anthropic API key
+6	Fixtures, event and analysis screens	Design feedback
+
+Open questions (defaults assumed if not answered):
+
+ Vercel plan: Hobby or Pro? (Assumed Hobby.)
+ Existing or new Supabase project for development? (Assumed new.)
+ Football stats source: free tier first, or a paid one? (Assumed free.)
+ UK only, or US bookmakers too? (Assumed UK only.)

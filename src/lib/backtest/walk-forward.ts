@@ -22,9 +22,27 @@ export interface HistoricalMatch {
   awayGoals: number;
 }
 
-export interface WalkForwardPrediction {
-  match: HistoricalMatch;
+export interface WalkForwardPrediction<M extends HistoricalMatch = HistoricalMatch> {
+  match: M;
   probabilities: OutcomeProbabilities;
+}
+
+/** Anything that can be replayed: told the teams each season, asked for a prediction, then told the result. */
+export interface WalkForwardModel<M extends HistoricalMatch = HistoricalMatch> {
+  startSeason(teams: readonly string[]): void;
+  predict(match: M): OutcomeProbabilities;
+  recordResult(match: M): void;
+}
+
+export function v1WalkForwardModel<M extends HistoricalMatch = HistoricalMatch>(
+  params: Readonly<Football1x2Params> = FOOTBALL_1X2_V1_PARAMS,
+): WalkForwardModel<M> {
+  const model = new Football1x2V1(params);
+  return {
+    startSeason: (teams) => model.startSeason(teams),
+    predict: (m) => model.predict(m.homeTeam, m.awayTeam).probabilities,
+    recordResult: (m) => model.recordResult(m),
+  };
 }
 
 export function outcomeOf(match: Pick<HistoricalMatch, "homeGoals" | "awayGoals">): Outcome {
@@ -33,13 +51,12 @@ export function outcomeOf(match: Pick<HistoricalMatch, "homeGoals" | "awayGoals"
   return "draw";
 }
 
-export function runWalkForward(
-  matches: readonly HistoricalMatch[],
-  params: Readonly<Football1x2Params> = FOOTBALL_1X2_V1_PARAMS,
-): WalkForwardPrediction[] {
+export function runWalkForward<M extends HistoricalMatch>(
+  matches: readonly M[],
+  model: WalkForwardModel<M> = v1WalkForwardModel(),
+): WalkForwardPrediction<M>[] {
   const sorted = [...matches].sort((a, b) => a.date.localeCompare(b.date) || a.id.localeCompare(b.id));
-  const model = new Football1x2V1(params);
-  const predictions: WalkForwardPrediction[] = [];
+  const predictions: WalkForwardPrediction<M>[] = [];
 
   // Each season's team list comes from its fixture list, which is public
   // before the season starts, so using it is not peeking.
@@ -54,7 +71,7 @@ export function runWalkForward(
   let i = 0;
   while (i < sorted.length) {
     const date = sorted[i].date;
-    const day: HistoricalMatch[] = [];
+    const day: M[] = [];
     while (i < sorted.length && sorted[i].date === date) day.push(sorted[i++]);
 
     for (const m of day) {
@@ -69,7 +86,7 @@ export function runWalkForward(
     // Predict the whole day first, then learn from it: we do not have
     // reliable kick-off times, so no same-day result is used.
     for (const m of day) {
-      predictions.push({ match: m, probabilities: model.predict(m.homeTeam, m.awayTeam).probabilities });
+      predictions.push({ match: m, probabilities: model.predict(m) });
     }
     for (const m of day) model.recordResult(m);
   }

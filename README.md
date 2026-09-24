@@ -14,7 +14,7 @@ Product rules: `CLAUDE.md` and `docs/MASTER_BRIEF.md`.
 | Type check | `npm run typecheck` |
 | Lint | `npm run lint` |
 | Download historical data (free) | `npm run data:fetch` |
-| Run the model backtest | `npm run backtest` (add `-- --fit` to re-pick settings) |
+| Run the model backtests | `npm run backtest` (v1) and `npm run backtest:v2` (add `-- --fit` to re-pick settings) |
 
 ### Database tests
 

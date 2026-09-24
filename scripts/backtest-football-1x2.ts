@@ -9,40 +9,38 @@
  * Every prediction is made walk-forward: only results from earlier days are
  * used. Parameters are chosen on the fitting seasons, never on test seasons.
  */
-import { readFileSync, writeFileSync } from "node:fs";
+import { writeFileSync } from "node:fs";
 import { join } from "node:path";
+import { logLoss } from "@/lib/backtest/metrics";
+import type { MatchWithOdds } from "@/lib/backtest/historical-data";
 import {
-  accuracy,
-  brierScore,
-  calibration,
-  calibrationError,
-  logLoss,
-  type CalibrationBin,
-  type ScoredForecast,
-} from "@/lib/backtest/metrics";
-import { loadHistoricalMatches, type MatchWithOdds, type OutcomePrices } from "@/lib/backtest/historical-data";
+  baselineRatesBySeason,
+  calibrationTable,
+  f4,
+  inSeasons,
+  loadDefaultMatches,
+  marketProbabilities,
+  mean,
+  pairedGap,
+  pct,
+  scoredBy,
+  signedPct,
+  summarise,
+} from "@/lib/backtest/report-helpers";
 import { simulateValueBets } from "@/lib/backtest/value-bets";
-import { outcomeOf, runWalkForward, type Outcome } from "@/lib/backtest/walk-forward";
+import { outcomeOf, runWalkForward, v1WalkForwardModel, type Outcome } from "@/lib/backtest/walk-forward";
 import {
   FOOTBALL_1X2_V1,
   FOOTBALL_1X2_V1_PARAMS,
   type Football1x2Params,
 } from "@/lib/models/football/football-1x2-v1";
 import type { OutcomeProbabilities } from "@/lib/models/football/poisson";
-import { removeMargin } from "@/lib/value/value";
 
 const FIT_SEASONS = { from: "2000-01", to: "2011-12" };
 const TEST_SEASONS = { from: "2012-13", to: "2025-26" };
 const OUTCOMES: Outcome[] = ["home", "draw", "away"];
 
-const dataDir = join(process.cwd(), "data", "historical");
-const matches = loadHistoricalMatches(
-  readFileSync(join(dataDir, "results.csv"), "utf8"),
-  readFileSync(join(dataDir, "results_with_odds.csv"), "utf8"),
-);
-
-const inSeasons = (season: string, range: { from: string; to: string }) =>
-  season >= range.from && season <= range.to;
+const matches = loadDefaultMatches();
 
 function fit() {
   const history = matches.filter((m) => m.season <= FIT_SEASONS.to);
@@ -60,7 +58,7 @@ function fit() {
         for (const promotedGap of grid.promotedGap)
           for (const seasonCarryOver of grid.seasonCarryOver) {
             const params = { kFactor, homeAdvantage, supremacyPer100, promotedGap, seasonCarryOver };
-            const scored = runWalkForward(history, params)
+            const scored = runWalkForward(history, v1WalkForwardModel(params))
               .filter((p) => inSeasons(p.match.season, FIT_SEASONS))
               .map((p) => ({ probabilities: p.probabilities, outcome: outcomeOf(p.match) }));
             const score = logLoss(scored);
@@ -88,12 +86,12 @@ function report() {
 type Results = ReturnType<typeof buildResults>;
 
 function buildResults() {
-  const predictions = runWalkForward(matches, FOOTBALL_1X2_V1_PARAMS);
+  const predictions = runWalkForward(matches, v1WalkForwardModel(FOOTBALL_1X2_V1_PARAMS));
   const baselines = baselineRatesBySeason(matches);
   const test: Row[] = predictions
     .filter((p) => inSeasons(p.match.season, TEST_SEASONS))
     .map((p) => ({
-      match: p.match as MatchWithOdds,
+      match: p.match,
       outcome: outcomeOf(p.match),
       model: p.probabilities,
       baseline: baselines.get(p.match.season)!,
@@ -155,71 +153,6 @@ function buildResults() {
     outcomeRates,
     valueBets,
   };
-}
-
-function marketProbabilities(prices: OutcomePrices): OutcomeProbabilities {
-  const [home, draw, away] = removeMargin([prices.home, prices.draw, prices.away]);
-  return { home, draw, away };
-}
-
-function scoredBy(rows: Row[], pick: (r: Row) => OutcomeProbabilities): ScoredForecast[] {
-  return rows.map((r) => ({ probabilities: pick(r), outcome: r.outcome }));
-}
-
-function summarise(rows: Row[], pick: (r: Row) => OutcomeProbabilities) {
-  const scored = scoredBy(rows, pick);
-  const bins = calibration(scored);
-  return {
-    logLoss: logLoss(scored),
-    brier: brierScore(scored),
-    accuracy: accuracy(scored),
-    calibrationError: calibrationError(bins),
-    calibration: bins,
-  };
-}
-
-/** Model log loss minus bookmaker log loss per match: average and a 95% range. */
-function pairedGap(rows: Row[], a: (r: Row) => OutcomeProbabilities, b: (r: Row) => OutcomeProbabilities) {
-  const diffs = rows.map((r) => -Math.log(a(r)[r.outcome]) + Math.log(b(r)[r.outcome]));
-  const m = mean(diffs);
-  const sd = Math.sqrt(diffs.reduce((s, d) => s + (d - m) ** 2, 0) / (diffs.length - 1));
-  const margin = (1.96 * sd) / Math.sqrt(diffs.length);
-  return { mean: m, low: m - margin, high: m + margin };
-}
-
-/** Home / draw / away rates from every match before each season (no peeking). */
-function baselineRatesBySeason(all: MatchWithOdds[]): Map<string, OutcomeProbabilities> {
-  const seasons = [...new Set(all.map((m) => m.season))].sort();
-  const rates = new Map<string, OutcomeProbabilities>();
-  for (const season of seasons) {
-    const before = all.filter((m) => m.season < season);
-    if (before.length === 0) continue;
-    const count = (o: Outcome) => before.filter((m) => outcomeOf(m) === o).length / before.length;
-    rates.set(season, { home: count("home"), draw: count("draw"), away: count("away") });
-  }
-  return rates;
-}
-
-function mean(xs: number[]): number {
-  return xs.reduce((a, b) => a + b, 0) / xs.length;
-}
-
-const pct = (x: number, dp = 1) => `${(x * 100).toFixed(dp)}%`;
-const signedPct = (x: number, dp = 1) => `${x >= 0 ? "+" : ""}${(x * 100).toFixed(dp)}%`;
-const f4 = (x: number) => x.toFixed(4);
-
-function calibrationTable(model: CalibrationBin[], bookmaker: CalibrationBin[]): string {
-  const rows = model.map((b) => {
-    const bk = bookmaker.find((x) => Math.abs(x.from - b.from) < 1e-9);
-    return `| ${pct(b.from, 0)} to ${pct(b.to, 0)} | ${b.count} | ${pct(b.predicted)} | ${pct(b.actual)} | ${
-      bk ? `${bk.count} | ${pct(bk.predicted)} | ${pct(bk.actual)}` : "0 | – | –"
-    } |`;
-  });
-  return [
-    "| Band | Model: count | Model: said | Happened | Pinnacle: count | Pinnacle: said | Happened |",
-    "| --- | --: | --: | --: | --: | --: | --: |",
-    ...rows,
-  ].join("\n");
 }
 
 function renderMarkdown(r: Results): string {

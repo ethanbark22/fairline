@@ -11,7 +11,8 @@
     "test:watch": "vitest",
     "typecheck": "next typegen && tsc --noEmit",
     "data:fetch": "tsx scripts/fetch-historical-data.ts",
-    "backtest": "tsx scripts/backtest-football-1x2.ts"
+    "backtest": "tsx scripts/backtest-football-1x2.ts",
+    "backtest:v2": "tsx scripts/backtest-football-1x2-v2.ts"
   },
   "dependencies": {
     "next": "16.3.6",

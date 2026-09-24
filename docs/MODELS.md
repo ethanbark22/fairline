@@ -29,3 +29,28 @@ Changing any setting means a new model version.
 since the 2000s. It ignores injuries, line-ups, transfers and managers. It
 treats the two teams' goals as independent, which slightly underestimates draws
 in close games.
+
+## football_1x2_v2 (Premier League match result)
+
+Code: `src/lib/models/football/football-1x2-v2.ts`. Backtest: `docs/backtests/football_1x2_v2.md`.
+
+1. **Market view.** The bookmaker's home / draw / away prices with the margin
+   removed. In the backtest this is Pinnacle's closing price.
+2. **Ratings view.** v1, except home advantage now moves after every match: up
+   when home sides do better than the ratings expected, down when they do worse
+   (0.25 rating points per unit of surprise). It fell from about 86 points in
+   the early 2000s to about 57 by 2025-26.
+3. **Combined.** A weighted geometric average of the two, rescaled to add up to 1.
+
+**Settings:** the learning rate (0.25) was chosen on 2000-01 to 2017-18. The
+market weight was chosen on 2012-13 to 2017-18, the first seasons with Pinnacle
+prices. Tested on 2018-19 onwards.
+
+**What the fit found:** every bit of weight given to our ratings made forecasts
+slightly worse than Pinnacle's closing price alone. So the market weight is
+100%, and v2's probabilities are the market's. The ratings view is still
+calculated. It is used when there is no market price (and flagged as such), and
+it is available as context for the explanation.
+
+**Known limit:** the backtest feeds v2 the closing price. Live analyses will
+have an earlier price, which is usually a little less accurate.

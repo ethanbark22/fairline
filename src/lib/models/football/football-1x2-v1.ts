@@ -70,8 +70,12 @@ export class Football1x2V1 {
   readonly version = FOOTBALL_1X2_V1;
   private ratings = new Map<string, number>();
   private recentGoals: number[] = [];
+  /** Fixed in v1; later versions may adjust it as results come in. */
+  protected homeAdvantage: number;
 
-  constructor(readonly params: Readonly<Football1x2Params> = FOOTBALL_1X2_V1_PARAMS) {}
+  constructor(readonly params: Readonly<Football1x2Params> = FOOTBALL_1X2_V1_PARAMS) {
+    this.homeAdvantage = params.homeAdvantage;
+  }
 
   /**
    * Call before each season with that season's teams (known in advance from
@@ -103,7 +107,7 @@ export class Football1x2V1 {
   predict(homeTeam: string, awayTeam: string): Football1x2Prediction {
     const home = this.rating(homeTeam);
     const away = this.rating(awayTeam);
-    const gap = home + this.params.homeAdvantage - away;
+    const gap = home + this.homeAdvantage - away;
     const supremacy = (this.params.supremacyPer100 * gap) / 100;
     const totalGoals = this.averageGoals();
     const homeGoals = Math.max(MIN_EXPECTED_GOALS, (totalGoals + supremacy) / 2);
@@ -119,7 +123,7 @@ export class Football1x2V1 {
   recordResult(result: MatchResult): void {
     const home = this.rating(result.homeTeam);
     const away = this.rating(result.awayTeam);
-    const expectedHome = 1 / (1 + 10 ** (-(home + this.params.homeAdvantage - away) / 400));
+    const expectedHome = 1 / (1 + 10 ** (-(home + this.homeAdvantage - away) / 400));
     const actualHome =
       result.homeGoals > result.awayGoals ? 1 : result.homeGoals === result.awayGoals ? 0.5 : 0;
     const change =
@@ -129,7 +133,12 @@ export class Football1x2V1 {
 
     this.recentGoals.push(result.homeGoals + result.awayGoals);
     if (this.recentGoals.length > GOALS_WINDOW) this.recentGoals.shift();
+    this.afterResult(actualHome - expectedHome);
   }
+
+  /** Hook for later versions. `surprise` is the home side's actual score (1, 0.5 or 0) minus what was expected. */
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  protected afterResult(surprise: number): void {}
 
   private averageGoals(): number {
     if (this.recentGoals.length === 0) return DEFAULT_GOALS_PER_GAME;

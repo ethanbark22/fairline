@@ -12,6 +12,8 @@ export interface HistoricalOdds {
   pinnacleClose?: OutcomePrices;
   /** Average closing price across the bookmakers football-data tracks. */
   averageClose?: OutcomePrices;
+  /** Best (highest) closing price across those bookmakers, outcome by outcome. */
+  maxClose?: OutcomePrices;
 }
 
 export type MatchWithOdds = HistoricalMatch & { odds: HistoricalOdds };
@@ -82,6 +84,7 @@ export function loadHistoricalMatches(resultsCsv: string, oddsCsv: string): Matc
       odds: {
         pinnacleClose: readPrices(oddsRow, "pinnacle_1x2_{o}_close"),
         averageClose: readPrices(oddsRow, "market_avg_1x2_{o}_close"),
+        maxClose: readPrices(oddsRow, "market_max_1x2_{o}_close"),
       },
     };
   });

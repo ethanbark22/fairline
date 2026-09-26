@@ -12,12 +12,14 @@
     "typecheck": "next typegen && tsc --noEmit",
     "data:fetch": "tsx scripts/fetch-historical-data.ts",
     "backtest": "tsx scripts/backtest-football-1x2.ts",
-    "backtest:v2": "tsx scripts/backtest-football-1x2-v2.ts"
+    "backtest:v2": "tsx scripts/backtest-football-1x2-v2.ts",
+    "odds:compare": "NODE_USE_ENV_PROXY=1 NODE_NO_WARNINGS=1 tsx scripts/compare-uk-vs-pinnacle.ts"
   },
   "dependencies": {
     "next": "16.3.6",
     "react": "19.2.8",
-    "react-dom": "19.2.8"
+    "react-dom": "19.2.8",
+    "zod": "^4.6.5"
   },
   "devDependencies": {
     "@tailwindcss/postcss": "^4",

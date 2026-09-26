@@ -14,6 +14,7 @@ Product rules: `CLAUDE.md` and `docs/MASTER_BRIEF.md`.
 | Type check | `npm run typecheck` |
 | Lint | `npm run lint` |
 | Download historical data (free) | `npm run data:fetch` |
+| Compare UK prices with Pinnacle (costs 2 Odds API credits) | `npm run odds:compare` |
 | Run the model backtests | `npm run backtest` (v1) and `npm run backtest:v2` (add `-- --fit` to re-pick settings) |
 
 ### Database tests

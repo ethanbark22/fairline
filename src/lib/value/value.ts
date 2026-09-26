@@ -62,6 +62,31 @@ export function removeMargin(prices: readonly number[]): number[] {
 }
 
 /**
+ * Margin removal, power method: finds the power k for which the raw implied
+ * probabilities, each raised to k, add up to exactly 1. Compared with the
+ * proportional method it takes more of the margin off longshots, which is
+ * closer to how bookmakers usually price. Used here as a second opinion, to
+ * see how much a "fair price" depends on the method chosen.
+ */
+export function removeMarginPower(prices: readonly number[]): number[] {
+  assertCompleteMarket(prices);
+  const raw = prices.map(impliedProbability);
+  const total = (k: number) => raw.reduce((sum, p) => sum + p ** k, 0);
+  // total(k) falls as k rises; search for total(k) = 1.
+  let low = 0.01;
+  let high = 50;
+  for (let i = 0; i < 200; i++) {
+    const mid = (low + high) / 2;
+    if (total(mid) > 1) low = mid;
+    else high = mid;
+  }
+  const k = (low + high) / 2;
+  const probs = raw.map((p) => p ** k);
+  const sum = probs.reduce((a, b) => a + b, 0);
+  return probs.map((p) => p / sum);
+}
+
+/**
  * Edge: model probability minus market probability.
  * 0.037 means our model rates the selection 3.7 percentage points more
  * likely than the market does. Negative means the market rates it higher.
@@ -110,4 +135,21 @@ function assertCompleteMarket(prices: readonly number[]): void {
     throw new RangeError(`A market needs at least 2 outcomes, got ${prices.length}`);
   }
   prices.forEach(assertValidPrice);
+}
+
+/** Fair price: the decimal price with no bookmaker margin, 1 / probability. */
+export function fairPrice(probability: number): number {
+  assertValidProbability(probability);
+  return 1 / probability;
+}
+
+/**
+ * Expected value per £1 staked: price x probability - 1.
+ * 0.03 means you would expect to get back £1.03 per £1 in the long run, if the
+ * probability is right. Negative means you would expect to lose.
+ */
+export function expectedValue(price: number, probability: number): number {
+  assertValidPrice(price);
+  assertValidProbability(probability);
+  return price * probability - 1;
 }

@@ -1,0 +1,1434 @@
+{
+  "runAt": "2026-09-24T06:28:18.411Z",
+  "creditsBefore": {
+    "used": 0,
+    "remaining": 500,
+    "lastCallCost": 0
+  },
+  "creditsAfter": {
+    "used": 2,
+    "remaining": 498,
+    "lastCallCost": 1
+  },
+  "creditsThisRun": 2,
+  "ukBookmakers": [
+    {
+      "key": "unibet_uk",
+      "title": "Unibet (UK)",
+      "exchange": false
+    },
+    {
+      "key": "betfred_uk",
+      "title": "Betfred (UK)",
+      "exchange": false
+    },
+    {
+      "key": "sport888",
+      "title": "888sport",
+      "exchange": false
+    },
+    {
+      "key": "leovegas",
+      "title": "LeoVegas",
+      "exchange": false
+    },
+    {
+      "key": "williamhill",
+      "title": "William Hill",
+      "exchange": false
+    },
+    {
+      "key": "paddypower",
+      "title": "Paddy Power",
+      "exchange": false
+    },
+    {
+      "key": "skybet",
+      "title": "Sky Bet",
+      "exchange": false
+    },
+    {
+      "key": "betfair_ex_uk",
+      "title": "Betfair",
+      "exchange": true
+    },
+    {
+      "key": "smarkets",
+      "title": "Smarkets",
+      "exchange": true
+    },
+    {
+      "key": "boylesports",
+      "title": "BoyleSports",
+      "exchange": false
+    },
+    {
+      "key": "virginbet",
+      "title": "Virgin Bet",
+      "exchange": false
+    },
+    {
+      "key": "grosvenor",
+      "title": "Grosvenor",
+      "exchange": false
+    },
+    {
+      "key": "livescorebet",
+      "title": "LiveScore Bet",
+      "exchange": false
+    },
+    {
+      "key": "ladbrokes_uk",
+      "title": "Ladbrokes",
+      "exchange": false
+    },
+    {
+      "key": "coral",
+      "title": "Coral",
+      "exchange": false
+    },
+    {
+      "key": "betvictor",
+      "title": "Bet Victor",
+      "exchange": false
+    },
+    {
+      "key": "betano_uk",
+      "title": "Betano (UK)",
+      "exchange": false
+    },
+    {
+      "key": "betway",
+      "title": "Betway",
+      "exchange": false
+    },
+    {
+      "key": "betfair_sb_uk",
+      "title": "Betfair Sportsbook",
+      "exchange": false
+    }
+  ],
+  "skipped": [],
+  "comparisons": [
+    {
+      "providerEventId": "b870dcfba5e5920d3f1551a3aa1ea435",
+      "commenceTime": "2026-10-10T11:30:00Z",
+      "homeTeam": "Arsenal",
+      "awayTeam": "Leeds United",
+      "outcome": "home",
+      "pinnaclePrice": 1.35,
+      "pinnacleMargin": 0.0590978173090857,
+      "pinnacleLastUpdate": "2026-09-24T06:27:52Z",
+      "fairProbability": 0.6994072961294414,
+      "fairPrice": 1.4297820533672656,
+      "fairProbabilityPower": 0.7235722693190407,
+      "bestUk": {
+        "bookmakerKey": "ladbrokes_uk",
+        "bookmakerTitle": "Ladbrokes",
+        "price": 1.4,
+        "lastUpdate": "2026-09-24T06:28:09Z"
+      },
+      "expectedValue": -0.02082978541878211,
+      "expectedValuePower": 0.013001177046656931,
+      "ukBookmakers": 17
+    },
+    {
+      "providerEventId": "b870dcfba5e5920d3f1551a3aa1ea435",
+      "commenceTime": "2026-10-10T11:30:00Z",
+      "homeTeam": "Arsenal",
+      "awayTeam": "Leeds United",
+      "outcome": "draw",
+      "pinnaclePrice": 5.08,
+      "pinnacleMargin": 0.0590978173090857,
+      "pinnacleLastUpdate": "2026-09-24T06:27:52Z",
+      "fairProbability": 0.18586611216038304,
+      "fairPrice": 5.380216911930155,
+      "fairProbabilityPower": 0.17337237533985125,
+      "bestUk": {
+        "bookmakerKey": "grosvenor",
+        "bookmakerTitle": "Grosvenor",
+        "price": 5.1,
+        "lastUpdate": "2026-09-24T06:28:09Z"
+      },
+      "expectedValue": -0.05208282798204655,
+      "expectedValuePower": -0.11580088576675862,
+      "ukBookmakers": 17
+    },
+    {
+      "providerEventId": "b870dcfba5e5920d3f1551a3aa1ea435",
+      "commenceTime": "2026-10-10T11:30:00Z",
+      "homeTeam": "Arsenal",
+      "awayTeam": "Leeds United",
+      "outcome": "away",
+      "pinnaclePrice": 8.23,
+      "pinnacleMargin": 0.0590978173090857,
+      "pinnacleLastUpdate": "2026-09-24T06:27:52Z",
+      "fairProbability": 0.11472659171017568,
+      "fairPrice": 8.716375036453776,
+      "fairProbabilityPower": 0.10305535534110813,
+      "bestUk": {
+        "bookmakerKey": "betfred_uk",
+        "bookmakerTitle": "Betfred (UK)",
+        "price": 9,
+        "lastUpdate": "2026-09-24T06:27:37Z"
+      },
+      "expectedValue": 0.03253932539158111,
+      "expectedValuePower": -0.07250180193002687,
+      "ukBookmakers": 17
+    },
+    {
+      "providerEventId": "02e6c0ccb11bb7ce78989ce49d67110b",
+      "commenceTime": "2026-10-10T14:00:00Z",
+      "homeTeam": "Aston Villa",
+      "awayTeam": "Brentford",
+      "outcome": "home",
+      "pinnaclePrice": 2.63,
+      "pinnacleMargin": 0.04951517695200591,
+      "pinnacleLastUpdate": "2026-09-24T06:27:52Z",
+      "fairProbability": 0.3622893172315859,
+      "fairPrice": 2.7602249153837755,
+      "fairProbabilityPower": 0.36352015054535025,
+      "bestUk": {
+        "bookmakerKey": "grosvenor",
+        "bookmakerTitle": "Grosvenor",
+        "price": 2.6,
+        "lastUpdate": "2026-09-24T06:28:09Z"
+      },
+      "expectedValue": -0.05804777519787663,
+      "expectedValuePower": -0.05484760858208937,
+      "ukBookmakers": 17
+    },
+    {
+      "providerEventId": "02e6c0ccb11bb7ce78989ce49d67110b",
+      "commenceTime": "2026-10-10T14:00:00Z",
+      "homeTeam": "Aston Villa",
+      "awayTeam": "Brentford",
+      "outcome": "draw",
+      "pinnaclePrice": 3.55,
+      "pinnacleMargin": 0.04951517695200591,
+      "pinnacleLastUpdate": "2026-09-24T06:27:52Z",
+      "fairProbability": 0.26840025473776646,
+      "fairPrice": 3.725778878179621,
+      "fairProbabilityPower": 0.26558404873489544,
+      "bestUk": {
+        "bookmakerKey": "grosvenor",
+        "bookmakerTitle": "Grosvenor",
+        "price": 3.65,
+        "lastUpdate": "2026-09-24T06:28:09Z"
+      },
+      "expectedValue": -0.02033907020715242,
+      "expectedValuePower": -0.030618222117631655,
+      "ukBookmakers": 17
+    },
+    {
+      "providerEventId": "02e6c0ccb11bb7ce78989ce49d67110b",
+      "commenceTime": "2026-10-10T14:00:00Z",
+      "homeTeam": "Aston Villa",
+      "awayTeam": "Brentford",
+      "outcome": "away",
+      "pinnaclePrice": 2.58,
+      "pinnacleMargin": 0.04951517695200591,
+      "pinnacleLastUpdate": "2026-09-24T06:27:52Z",
+      "fairProbability": 0.3693104280306476,
+      "fairPrice": 2.7077491565361753,
+      "fairProbabilityPower": 0.37089580071975436,
+      "bestUk": {
+        "bookmakerKey": "grosvenor",
+        "bookmakerTitle": "Grosvenor",
+        "price": 2.63,
+        "lastUpdate": "2026-09-24T06:28:09Z"
+      },
+      "expectedValue": -0.028713574279396803,
+      "expectedValuePower": -0.024544044107046026,
+      "ukBookmakers": 17
+    },
+    {
+      "providerEventId": "45d4a466e32cd2b4ea535207923ceaf5",
+      "commenceTime": "2026-10-10T14:00:00Z",
+      "homeTeam": "Chelsea",
+      "awayTeam": "Bournemouth",
+      "outcome": "home",
+      "pinnaclePrice": 1.81,
+      "pinnacleMargin": 0.05248618784530379,
+      "pinnacleLastUpdate": "2026-09-24T06:27:52Z",
+      "fairProbability": 0.5249343832020998,
+      "fairPrice": 1.9049999999999996,
+      "fairProbabilityPower": 0.5353950138959576,
+      "bestUk": {
+        "bookmakerKey": "sport888",
+        "bookmakerTitle": "888sport",
+        "price": 1.85,
+        "lastUpdate": "2026-09-24T06:27:53Z"
+      },
+      "expectedValue": -0.02887139107611525,
+      "expectedValuePower": -0.009519224292478423,
+      "ukBookmakers": 17
+    },
+    {
+      "providerEventId": "45d4a466e32cd2b4ea535207923ceaf5",
+      "commenceTime": "2026-10-10T14:00:00Z",
+      "homeTeam": "Chelsea",
+      "awayTeam": "Bournemouth",
+      "outcome": "draw",
+      "pinnaclePrice": 4,
+      "pinnacleMargin": 0.05248618784530379,
+      "pinnacleLastUpdate": "2026-09-24T06:27:52Z",
+      "fairProbability": 0.23753280839895016,
+      "fairPrice": 4.209944751381215,
+      "fairProbabilityPower": 0.2323024930520212,
+      "bestUk": {
+        "bookmakerKey": "ladbrokes_uk",
+        "bookmakerTitle": "Ladbrokes",
+        "price": 4.2,
+        "lastUpdate": "2026-09-24T06:28:09Z"
+      },
+      "expectedValue": -0.002362204724409289,
+      "expectedValuePower": -0.02432952918151099,
+      "ukBookmakers": 17
+    },
+    {
+      "providerEventId": "45d4a466e32cd2b4ea535207923ceaf5",
+      "commenceTime": "2026-10-10T14:00:00Z",
+      "homeTeam": "Chelsea",
+      "awayTeam": "Bournemouth",
+      "outcome": "away",
+      "pinnaclePrice": 4,
+      "pinnacleMargin": 0.05248618784530379,
+      "pinnacleLastUpdate": "2026-09-24T06:27:52Z",
+      "fairProbability": 0.23753280839895016,
+      "fairPrice": 4.209944751381215,
+      "fairProbabilityPower": 0.2323024930520212,
+      "bestUk": {
+        "bookmakerKey": "grosvenor",
+        "bookmakerTitle": "Grosvenor",
+        "price": 3.95,
+        "lastUpdate": "2026-09-24T06:28:09Z"
+      },
+      "expectedValue": -0.061745406824146865,
+      "expectedValuePower": -0.0824051524445163,
+      "ukBookmakers": 17
+    },
+    {
+      "providerEventId": "380b8f24ec5430fb545a7490c1017285",
+      "commenceTime": "2026-10-10T14:00:00Z",
+      "homeTeam": "Sunderland",
+      "awayTeam": "Brighton and Hove Albion",
+      "outcome": "home",
+      "pinnaclePrice": 2.76,
+      "pinnacleMargin": 0.0496630158810667,
+      "pinnacleLastUpdate": "2026-09-24T06:27:52Z",
+      "fairProbability": 0.3451763424050783,
+      "fairPrice": 2.8970699238317437,
+      "fairProbabilityPower": 0.34555788741916266,
+      "bestUk": {
+        "bookmakerKey": "grosvenor",
+        "bookmakerTitle": "Grosvenor",
+        "price": 2.8,
+        "lastUpdate": "2026-09-24T06:28:09Z"
+      },
+      "expectedValue": -0.033506241265780945,
+      "expectedValuePower": -0.03243791522634465,
+      "ukBookmakers": 17
+    },
+    {
+      "providerEventId": "380b8f24ec5430fb545a7490c1017285",
+      "commenceTime": "2026-10-10T14:00:00Z",
+      "homeTeam": "Sunderland",
+      "awayTeam": "Brighton and Hove Albion",
+      "outcome": "draw",
+      "pinnaclePrice": 3.54,
+      "pinnacleMargin": 0.0496630158810667,
+      "pinnacleLastUpdate": "2026-09-24T06:27:52Z",
+      "fairProbability": 0.2691205381463322,
+      "fairPrice": 3.715807076218976,
+      "fairProbabilityPower": 0.26630763653700806,
+      "bestUk": {
+        "bookmakerKey": "grosvenor",
+        "bookmakerTitle": "Grosvenor",
+        "price": 3.55,
+        "lastUpdate": "2026-09-24T06:28:09Z"
+      },
+      "expectedValue": -0.04462208958052083,
+      "expectedValuePower": -0.05460789029362145,
+      "ukBookmakers": 17
+    },
+    {
+      "providerEventId": "380b8f24ec5430fb545a7490c1017285",
+      "commenceTime": "2026-10-10T14:00:00Z",
+      "homeTeam": "Sunderland",
+      "awayTeam": "Brighton and Hove Albion",
+      "outcome": "away",
+      "pinnaclePrice": 2.47,
+      "pinnacleMargin": 0.0496630158810667,
+      "pinnacleLastUpdate": "2026-09-24T06:27:52Z",
+      "fairProbability": 0.3857031194485894,
+      "fairPrice": 2.5926676492262346,
+      "fairProbabilityPower": 0.3881344760438292,
+      "bestUk": {
+        "bookmakerKey": "betfred_uk",
+        "bookmakerTitle": "Betfred (UK)",
+        "price": 2.5,
+        "lastUpdate": "2026-09-24T06:27:37Z"
+      },
+      "expectedValue": -0.03574220137852646,
+      "expectedValuePower": -0.02966380989042694,
+      "ukBookmakers": 17
+    },
+    {
+      "providerEventId": "288b4ff00c79daa712c911c564fe1be7",
+      "commenceTime": "2026-10-10T14:00:00Z",
+      "homeTeam": "Ipswich Town",
+      "awayTeam": "Fulham",
+      "outcome": "home",
+      "pinnaclePrice": 2.66,
+      "pinnacleMargin": 0.05054302422723467,
+      "pinnacleLastUpdate": "2026-09-24T06:27:52Z",
+      "fairProbability": 0.35785288270377735,
+      "fairPrice": 2.7944444444444443,
+      "fairProbabilityPower": 0.3588590685697335,
+      "bestUk": {
+        "bookmakerKey": "williamhill",
+        "bookmakerTitle": "William Hill",
+        "price": 2.7,
+        "lastUpdate": "2026-09-24T06:27:53Z"
+      },
+      "expectedValue": -0.03379721669980107,
+      "expectedValuePower": -0.031080514861719477,
+      "ukBookmakers": 17
+    },
+    {
+      "providerEventId": "288b4ff00c79daa712c911c564fe1be7",
+      "commenceTime": "2026-10-10T14:00:00Z",
+      "homeTeam": "Ipswich Town",
+      "awayTeam": "Fulham",
+      "outcome": "draw",
+      "pinnaclePrice": 3.6,
+      "pinnacleMargin": 0.05054302422723467,
+      "pinnacleLastUpdate": "2026-09-24T06:27:52Z",
+      "fairProbability": 0.26441351888667997,
+      "fairPrice": 3.7819548872180446,
+      "fairProbabilityPower": 0.2613705702622711,
+      "bestUk": {
+        "bookmakerKey": "grosvenor",
+        "bookmakerTitle": "Grosvenor",
+        "price": 3.6,
+        "lastUpdate": "2026-09-24T06:28:09Z"
+      },
+      "expectedValue": -0.048111332007952146,
+      "expectedValuePower": -0.05906594705582391,
+      "ukBookmakers": 17
+    },
+    {
+      "providerEventId": "288b4ff00c79daa712c911c564fe1be7",
+      "commenceTime": "2026-10-10T14:00:00Z",
+      "homeTeam": "Ipswich Town",
+      "awayTeam": "Fulham",
+      "outcome": "away",
+      "pinnaclePrice": 2.52,
+      "pinnacleMargin": 0.05054302422723467,
+      "pinnacleLastUpdate": "2026-09-24T06:27:52Z",
+      "fairProbability": 0.37773359840954274,
+      "fairPrice": 2.6473684210526316,
+      "fairProbabilityPower": 0.3797703611679954,
+      "bestUk": {
+        "bookmakerKey": "grosvenor",
+        "bookmakerTitle": "Grosvenor",
+        "price": 2.6,
+        "lastUpdate": "2026-09-24T06:28:09Z"
+      },
+      "expectedValue": -0.017892644135188873,
+      "expectedValuePower": -0.012597060963211892,
+      "ukBookmakers": 17
+    },
+    {
+      "providerEventId": "22c9b2c43cbe1334381269550dab78e6",
+      "commenceTime": "2026-10-10T16:30:00Z",
+      "homeTeam": "Manchester United",
+      "awayTeam": "Tottenham Hotspur",
+      "outcome": "home",
+      "pinnaclePrice": 1.69,
+      "pinnacleMargin": 0.05526581196722469,
+      "pinnacleLastUpdate": "2026-09-24T06:27:52Z",
+      "fairProbability": 0.5607269463494559,
+      "fairPrice": 1.7833992222246096,
+      "fairProbabilityPower": 0.5740298060673903,
+      "bestUk": {
+        "bookmakerKey": "paddypower",
+        "bookmakerTitle": "Paddy Power",
+        "price": 1.73,
+        "lastUpdate": "2026-09-24T06:27:37Z"
+      },
+      "expectedValue": -0.02994238281544137,
+      "expectedValuePower": -0.00692843550341482,
+      "ukBookmakers": 17
+    },
+    {
+      "providerEventId": "22c9b2c43cbe1334381269550dab78e6",
+      "commenceTime": "2026-10-10T16:30:00Z",
+      "homeTeam": "Manchester United",
+      "awayTeam": "Tottenham Hotspur",
+      "outcome": "draw",
+      "pinnaclePrice": 4.27,
+      "pinnacleMargin": 0.05526581196722469,
+      "pinnacleLastUpdate": "2026-09-24T06:27:52Z",
+      "fairProbability": 0.22192705839123664,
+      "fairPrice": 4.505985017100049,
+      "fairProbabilityPower": 0.21533470398377969,
+      "bestUk": {
+        "bookmakerKey": "betfred_uk",
+        "bookmakerTitle": "Betfred (UK)",
+        "price": 4.2,
+        "lastUpdate": "2026-09-24T06:27:37Z"
+      },
+      "expectedValue": -0.06790635475680606,
+      "expectedValuePower": -0.09559424326812527,
+      "ukBookmakers": 17
+    },
+    {
+      "providerEventId": "22c9b2c43cbe1334381269550dab78e6",
+      "commenceTime": "2026-10-10T16:30:00Z",
+      "homeTeam": "Manchester United",
+      "awayTeam": "Tottenham Hotspur",
+      "outcome": "away",
+      "pinnaclePrice": 4.36,
+      "pinnacleMargin": 0.05526581196722469,
+      "pinnacleLastUpdate": "2026-09-24T06:27:52Z",
+      "fairProbability": 0.2173459952593074,
+      "fairPrice": 4.6009589401771,
+      "fairProbabilityPower": 0.21063548994882997,
+      "bestUk": {
+        "bookmakerKey": "williamhill",
+        "bookmakerTitle": "William Hill",
+        "price": 4.5,
+        "lastUpdate": "2026-09-24T06:27:53Z"
+      },
+      "expectedValue": -0.021943021333116763,
+      "expectedValuePower": -0.0521402952302652,
+      "ukBookmakers": 17
+    },
+    {
+      "providerEventId": "86effab5c6e7bfd58c8e88b1fb7c6ba9",
+      "commenceTime": "2026-10-11T13:00:00Z",
+      "homeTeam": "Crystal Palace",
+      "awayTeam": "Nottingham Forest",
+      "outcome": "home",
+      "pinnaclePrice": 2.62,
+      "pinnacleMargin": 0.049164428441410335,
+      "pinnacleLastUpdate": "2026-09-24T06:27:52Z",
+      "fairProbability": 0.3637936809199509,
+      "fairPrice": 2.7488108025164952,
+      "fairProbabilityPower": 0.3651346700258795,
+      "bestUk": {
+        "bookmakerKey": "grosvenor",
+        "bookmakerTitle": "Grosvenor",
+        "price": 2.65,
+        "lastUpdate": "2026-09-24T06:28:09Z"
+      },
+      "expectedValue": -0.03594674556213018,
+      "expectedValuePower": -0.032393124431419285,
+      "ukBookmakers": 17
+    },
+    {
+      "providerEventId": "86effab5c6e7bfd58c8e88b1fb7c6ba9",
+      "commenceTime": "2026-10-11T13:00:00Z",
+      "homeTeam": "Crystal Palace",
+      "awayTeam": "Nottingham Forest",
+      "outcome": "draw",
+      "pinnaclePrice": 3.43,
+      "pinnacleMargin": 0.049164428441410335,
+      "pinnacleLastUpdate": "2026-09-24T06:27:52Z",
+      "fairProbability": 0.2778832198280674,
+      "fairPrice": 3.5986339895540382,
+      "fairProbabilityPower": 0.2754720344189098,
+      "bestUk": {
+        "bookmakerKey": "boylesports",
+        "bookmakerTitle": "BoyleSports",
+        "price": 3.4,
+        "lastUpdate": "2026-09-24T06:27:53Z"
+      },
+      "expectedValue": -0.05519705258457086,
+      "expectedValuePower": -0.06339508297570684,
+      "ukBookmakers": 17
+    },
+    {
+      "providerEventId": "86effab5c6e7bfd58c8e88b1fb7c6ba9",
+      "commenceTime": "2026-10-11T13:00:00Z",
+      "homeTeam": "Crystal Palace",
+      "awayTeam": "Nottingham Forest",
+      "outcome": "away",
+      "pinnaclePrice": 2.66,
+      "pinnacleMargin": 0.049164428441410335,
+      "pinnacleLastUpdate": "2026-09-24T06:27:52Z",
+      "fairProbability": 0.3583230992519817,
+      "fairPrice": 2.7907773796541515,
+      "fairProbabilityPower": 0.3593932955552108,
+      "bestUk": {
+        "bookmakerKey": "unibet_uk",
+        "bookmakerTitle": "Unibet (UK)",
+        "price": 2.65,
+        "lastUpdate": "2026-09-24T06:27:54Z"
+      },
+      "expectedValue": -0.050443786982248495,
+      "expectedValuePower": -0.047607766778691385,
+      "ukBookmakers": 17
+    },
+    {
+      "providerEventId": "0bdae4d304810578e47386606bff7106",
+      "commenceTime": "2026-10-11T13:00:00Z",
+      "homeTeam": "Hull City",
+      "awayTeam": "Everton",
+      "outcome": "home",
+      "pinnaclePrice": 3.71,
+      "pinnacleMargin": 0.05233190776198482,
+      "pinnacleLastUpdate": "2026-09-24T06:27:52Z",
+      "fairProbability": 0.2561376092348859,
+      "fairPrice": 3.9041513777969636,
+      "fairProbabilityPower": 0.25225427873994494,
+      "bestUk": {
+        "bookmakerKey": "grosvenor",
+        "bookmakerTitle": "Grosvenor",
+        "price": 3.85,
+        "lastUpdate": "2026-09-24T06:28:09Z"
+      },
+      "expectedValue": -0.013870204445689316,
+      "expectedValuePower": -0.028821026851212017,
+      "ukBookmakers": 17
+    },
+    {
+      "providerEventId": "0bdae4d304810578e47386606bff7106",
+      "commenceTime": "2026-10-11T13:00:00Z",
+      "homeTeam": "Hull City",
+      "awayTeam": "Everton",
+      "outcome": "draw",
+      "pinnaclePrice": 3.39,
+      "pinnacleMargin": 0.05233190776198482,
+      "pinnacleLastUpdate": "2026-09-24T06:27:52Z",
+      "fairProbability": 0.280315790637589,
+      "fairPrice": 3.567405167313128,
+      "fairProbabilityPower": 0.27732779669440194,
+      "bestUk": {
+        "bookmakerKey": "betfred_uk",
+        "bookmakerTitle": "Betfred (UK)",
+        "price": 3.4,
+        "lastUpdate": "2026-09-24T06:27:37Z"
+      },
+      "expectedValue": -0.04692631183219742,
+      "expectedValuePower": -0.05708549123903339,
+      "ukBookmakers": 17
+    },
+    {
+      "providerEventId": "0bdae4d304810578e47386606bff7106",
+      "commenceTime": "2026-10-11T13:00:00Z",
+      "homeTeam": "Hull City",
+      "awayTeam": "Everton",
+      "outcome": "away",
+      "pinnaclePrice": 2.05,
+      "pinnacleMargin": 0.05233190776198482,
+      "pinnacleLastUpdate": "2026-09-24T06:27:52Z",
+      "fairProbability": 0.46354660012752524,
+      "fairPrice": 2.1572804109120685,
+      "fairProbabilityPower": 0.4704179245656532,
+      "bestUk": {
+        "bookmakerKey": "grosvenor",
+        "bookmakerTitle": "Grosvenor",
+        "price": 2.1,
+        "lastUpdate": "2026-09-24T06:28:09Z"
+      },
+      "expectedValue": -0.026552139732196944,
+      "expectedValuePower": -0.012122358412128276,
+      "ukBookmakers": 17
+    },
+    {
+      "providerEventId": "6dbab232dd8d2aed0cb1d6f7978fb7b1",
+      "commenceTime": "2026-10-11T15:30:00Z",
+      "homeTeam": "Liverpool",
+      "awayTeam": "Manchester City",
+      "outcome": "home",
+      "pinnaclePrice": 2.7,
+      "pinnacleMargin": 0.04974821491988202,
+      "pinnacleLastUpdate": "2026-09-24T06:27:52Z",
+      "fairProbability": 0.35281829023985284,
+      "fairPrice": 2.8343201802836817,
+      "fairProbabilityPower": 0.3535044560433254,
+      "bestUk": {
+        "bookmakerKey": "coral",
+        "bookmakerTitle": "Coral",
+        "price": 2.8,
+        "lastUpdate": "2026-09-24T06:26:32Z"
+      },
+      "expectedValue": -0.01210878732841214,
+      "expectedValuePower": -0.010187523078688865,
+      "ukBookmakers": 17
+    },
+    {
+      "providerEventId": "6dbab232dd8d2aed0cb1d6f7978fb7b1",
+      "commenceTime": "2026-10-11T15:30:00Z",
+      "homeTeam": "Liverpool",
+      "awayTeam": "Manchester City",
+      "outcome": "draw",
+      "pinnaclePrice": 3.71,
+      "pinnacleMargin": 0.04974821491988202,
+      "pinnacleLastUpdate": "2026-09-24T06:27:52Z",
+      "fairProbability": 0.2567680279373592,
+      "fairPrice": 3.8945658773527625,
+      "fairProbabilityPower": 0.2534596025312989,
+      "bestUk": {
+        "bookmakerKey": "grosvenor",
+        "bookmakerTitle": "Grosvenor",
+        "price": 3.75,
+        "lastUpdate": "2026-09-24T06:28:09Z"
+      },
+      "expectedValue": -0.037119895234903,
+      "expectedValuePower": -0.04952649050762914,
+      "ukBookmakers": 17
+    },
+    {
+      "providerEventId": "6dbab232dd8d2aed0cb1d6f7978fb7b1",
+      "commenceTime": "2026-10-11T15:30:00Z",
+      "homeTeam": "Liverpool",
+      "awayTeam": "Manchester City",
+      "outcome": "away",
+      "pinnaclePrice": 2.44,
+      "pinnacleMargin": 0.04974821491988202,
+      "pinnacleLastUpdate": "2026-09-24T06:27:52Z",
+      "fairProbability": 0.390413681822788,
+      "fairPrice": 2.561385644404512,
+      "fairProbabilityPower": 0.3930359414253756,
+      "bestUk": {
+        "bookmakerKey": "sport888",
+        "bookmakerTitle": "888sport",
+        "price": 2.4,
+        "lastUpdate": "2026-09-24T06:27:53Z"
+      },
+      "expectedValue": -0.06300716362530878,
+      "expectedValuePower": -0.056713740579098504,
+      "ukBookmakers": 17
+    },
+    {
+      "providerEventId": "acd5bd945dd953ad1e300df5bfe696f9",
+      "commenceTime": "2026-10-12T19:00:00Z",
+      "homeTeam": "Coventry City",
+      "awayTeam": "Newcastle United",
+      "outcome": "home",
+      "pinnaclePrice": 3.35,
+      "pinnacleMargin": 0.049888091403644585,
+      "pinnacleLastUpdate": "2026-09-24T06:27:52Z",
+      "fairProbability": 0.28432312465557974,
+      "fairPrice": 3.5171251062022097,
+      "fairProbabilityPower": 0.28179530038103734,
+      "bestUk": {
+        "bookmakerKey": "ladbrokes_uk",
+        "bookmakerTitle": "Ladbrokes",
+        "price": 3.4,
+        "lastUpdate": "2026-09-24T06:28:09Z"
+      },
+      "expectedValue": -0.03330137617102891,
+      "expectedValuePower": -0.041895978704473036,
+      "ukBookmakers": 16
+    },
+    {
+      "providerEventId": "acd5bd945dd953ad1e300df5bfe696f9",
+      "commenceTime": "2026-10-12T19:00:00Z",
+      "homeTeam": "Coventry City",
+      "awayTeam": "Newcastle United",
+      "outcome": "draw",
+      "pinnaclePrice": 3.52,
+      "pinnacleMargin": 0.049888091403644585,
+      "pinnacleLastUpdate": "2026-09-24T06:27:52Z",
+      "fairProbability": 0.2705916101125546,
+      "fairPrice": 3.695606081740829,
+      "fairProbabilityPower": 0.26755396493188505,
+      "bestUk": {
+        "bookmakerKey": "betfred_uk",
+        "bookmakerTitle": "Betfred (UK)",
+        "price": 3.75,
+        "lastUpdate": "2026-09-24T06:27:37Z"
+      },
+      "expectedValue": 0.014718537922079777,
+      "expectedValuePower": 0.0033273684945689386,
+      "ukBookmakers": 16
+    },
+    {
+      "providerEventId": "acd5bd945dd953ad1e300df5bfe696f9",
+      "commenceTime": "2026-10-12T19:00:00Z",
+      "homeTeam": "Coventry City",
+      "awayTeam": "Newcastle United",
+      "outcome": "away",
+      "pinnaclePrice": 2.14,
+      "pinnacleMargin": 0.049888091403644585,
+      "pinnacleLastUpdate": "2026-09-24T06:27:52Z",
+      "fairProbability": 0.44508526523186553,
+      "fairPrice": 2.2467605156037993,
+      "fairProbabilityPower": 0.45065073468707756,
+      "bestUk": {
+        "bookmakerKey": "grosvenor",
+        "bookmakerTitle": "Grosvenor",
+        "price": 2.14,
+        "lastUpdate": "2026-09-24T06:28:09Z"
+      },
+      "expectedValue": -0.04751753240380774,
+      "expectedValuePower": -0.035607427769653976,
+      "ukBookmakers": 16
+    },
+    {
+      "providerEventId": "764e6513cb3f348881503df70ccb90e0",
+      "commenceTime": "2026-10-17T11:30:00Z",
+      "homeTeam": "Everton",
+      "awayTeam": "Chelsea",
+      "outcome": "home",
+      "pinnaclePrice": 2.8,
+      "pinnacleMargin": 0.05045995670995662,
+      "pinnacleLastUpdate": "2026-09-24T06:27:52Z",
+      "fairProbability": 0.33998712169993567,
+      "fairPrice": 2.9412878787878785,
+      "fairProbabilityPower": 0.3399556753486652,
+      "bestUk": {
+        "bookmakerKey": "grosvenor",
+        "bookmakerTitle": "Grosvenor",
+        "price": 2.95,
+        "lastUpdate": "2026-09-24T06:28:09Z"
+      },
+      "expectedValue": 0.002962009014810363,
+      "expectedValuePower": 0.002869242278562556,
+      "ukBookmakers": 12
+    },
+    {
+      "providerEventId": "764e6513cb3f348881503df70ccb90e0",
+      "commenceTime": "2026-10-17T11:30:00Z",
+      "homeTeam": "Everton",
+      "awayTeam": "Chelsea",
+      "outcome": "draw",
+      "pinnaclePrice": 3.84,
+      "pinnacleMargin": 0.05045995670995662,
+      "pinnacleLastUpdate": "2026-09-24T06:27:52Z",
+      "fairProbability": 0.24790727623953643,
+      "fairPrice": 4.033766233766233,
+      "fairProbabilityPower": 0.24416210501423308,
+      "bestUk": {
+        "bookmakerKey": "betway",
+        "bookmakerTitle": "Betway",
+        "price": 3.8,
+        "lastUpdate": "2026-09-24T06:27:21Z"
+      },
+      "expectedValue": -0.057952350289761645,
+      "expectedValuePower": -0.07218400094591437,
+      "ukBookmakers": 12
+    },
+    {
+      "providerEventId": "764e6513cb3f348881503df70ccb90e0",
+      "commenceTime": "2026-10-17T11:30:00Z",
+      "homeTeam": "Everton",
+      "awayTeam": "Chelsea",
+      "outcome": "away",
+      "pinnaclePrice": 2.31,
+      "pinnacleMargin": 0.05045995670995662,
+      "pinnacleLastUpdate": "2026-09-24T06:27:52Z",
+      "fairProbability": 0.41210560206052804,
+      "fairPrice": 2.4265624999999997,
+      "fairProbabilityPower": 0.4158822196371018,
+      "bestUk": {
+        "bookmakerKey": "williamhill",
+        "bookmakerTitle": "William Hill",
+        "price": 2.3,
+        "lastUpdate": "2026-09-24T06:27:53Z"
+      },
+      "expectedValue": -0.05215711526078559,
+      "expectedValuePower": -0.04347089483466593,
+      "ukBookmakers": 12
+    },
+    {
+      "providerEventId": "8f1945e7272bc7e89016439f5ab321c7",
+      "commenceTime": "2026-10-17T14:00:00Z",
+      "homeTeam": "Brentford",
+      "awayTeam": "Liverpool",
+      "outcome": "home",
+      "pinnaclePrice": 2.79,
+      "pinnacleMargin": 0.05019761159739433,
+      "pinnacleLastUpdate": "2026-09-24T06:27:52Z",
+      "fairProbability": 0.34129094858911757,
+      "fairPrice": 2.93005133635673,
+      "fairProbabilityPower": 0.3414572108705538,
+      "bestUk": {
+        "bookmakerKey": "unibet_uk",
+        "bookmakerTitle": "Unibet (UK)",
+        "price": 2.75,
+        "lastUpdate": "2026-09-24T06:27:54Z"
+      },
+      "expectedValue": -0.061449891379926624,
+      "expectedValuePower": -0.06099267010597709,
+      "ukBookmakers": 12
+    },
+    {
+      "providerEventId": "8f1945e7272bc7e89016439f5ab321c7",
+      "commenceTime": "2026-10-17T14:00:00Z",
+      "homeTeam": "Brentford",
+      "awayTeam": "Liverpool",
+      "outcome": "draw",
+      "pinnaclePrice": 3.59,
+      "pinnacleMargin": 0.05019761159739433,
+      "pinnacleLastUpdate": "2026-09-24T06:27:52Z",
+      "fairProbability": 0.2652372553102056,
+      "fairPrice": 3.7702094256346452,
+      "fairProbabilityPower": 0.26222341677917765,
+      "bestUk": {
+        "bookmakerKey": "paddypower",
+        "bookmakerTitle": "Paddy Power",
+        "price": 3.8,
+        "lastUpdate": "2026-09-24T06:27:37Z"
+      },
+      "expectedValue": 0.007901570178781236,
+      "expectedValuePower": -0.0035510162391250155,
+      "ukBookmakers": 12
+    },
+    {
+      "providerEventId": "8f1945e7272bc7e89016439f5ab321c7",
+      "commenceTime": "2026-10-17T14:00:00Z",
+      "homeTeam": "Brentford",
+      "awayTeam": "Liverpool",
+      "outcome": "away",
+      "pinnaclePrice": 2.42,
+      "pinnacleMargin": 0.05019761159739433,
+      "pinnacleLastUpdate": "2026-09-24T06:27:52Z",
+      "fairProbability": 0.39347179610067684,
+      "fairPrice": 2.5414782200656942,
+      "fairProbabilityPower": 0.39631937235026843,
+      "bestUk": {
+        "bookmakerKey": "grosvenor",
+        "bookmakerTitle": "Grosvenor",
+        "price": 2.4,
+        "lastUpdate": "2026-09-24T06:28:09Z"
+      },
+      "expectedValue": -0.05566768935837563,
+      "expectedValuePower": -0.048833506359355794,
+      "ukBookmakers": 12
+    },
+    {
+      "providerEventId": "7895f97f2f9577f3b13287a3d086859d",
+      "commenceTime": "2026-10-17T14:00:00Z",
+      "homeTeam": "Fulham",
+      "awayTeam": "Hull City",
+      "outcome": "home",
+      "pinnaclePrice": 1.67,
+      "pinnacleMargin": 0.05531692491152507,
+      "pinnacleLastUpdate": "2026-09-24T06:27:52Z",
+      "fairProbability": 0.5674147557709102,
+      "fairPrice": 1.7623792646022465,
+      "fairProbabilityPower": 0.5811393752013514,
+      "bestUk": {
+        "bookmakerKey": "grosvenor",
+        "bookmakerTitle": "Grosvenor",
+        "price": 1.68,
+        "lastUpdate": "2026-09-24T06:28:09Z"
+      },
+      "expectedValue": -0.04674321030487094,
+      "expectedValuePower": -0.023685849661729708,
+      "ukBookmakers": 12
+    },
+    {
+      "providerEventId": "7895f97f2f9577f3b13287a3d086859d",
+      "commenceTime": "2026-10-17T14:00:00Z",
+      "homeTeam": "Fulham",
+      "awayTeam": "Hull City",
+      "outcome": "draw",
+      "pinnaclePrice": 4.08,
+      "pinnacleMargin": 0.05531692491152507,
+      "pinnacleLastUpdate": "2026-09-24T06:27:52Z",
+      "fairProbability": 0.23225064758270092,
+      "fairPrice": 4.305693053639023,
+      "fairProbabilityPower": 0.22578061279063025,
+      "bestUk": {
+        "bookmakerKey": "grosvenor",
+        "bookmakerTitle": "Grosvenor",
+        "price": 4,
+        "lastUpdate": "2026-09-24T06:28:09Z"
+      },
+      "expectedValue": -0.07099740966919632,
+      "expectedValuePower": -0.09687754883747901,
+      "ukBookmakers": 12
+    },
+    {
+      "providerEventId": "7895f97f2f9577f3b13287a3d086859d",
+      "commenceTime": "2026-10-17T14:00:00Z",
+      "homeTeam": "Fulham",
+      "awayTeam": "Hull City",
+      "outcome": "away",
+      "pinnaclePrice": 4.73,
+      "pinnacleMargin": 0.05531692491152507,
+      "pinnacleLastUpdate": "2026-09-24T06:27:52Z",
+      "fairProbability": 0.20033459664638895,
+      "fairPrice": 4.991649054831514,
+      "fairProbabilityPower": 0.19308001200801836,
+      "bestUk": {
+        "bookmakerKey": "betfred_uk",
+        "bookmakerTitle": "Betfred (UK)",
+        "price": 5,
+        "lastUpdate": "2026-09-24T06:27:37Z"
+      },
+      "expectedValue": 0.001672983231944647,
+      "expectedValuePower": -0.03459993995990818,
+      "ukBookmakers": 12
+    },
+    {
+      "providerEventId": "bf2142d1ca76ba2fc9e61afce80f86c0",
+      "commenceTime": "2026-10-17T14:00:00Z",
+      "homeTeam": "Manchester City",
+      "awayTeam": "Ipswich Town",
+      "outcome": "home",
+      "pinnaclePrice": 1.21,
+      "pinnacleMargin": 0.06523553712203212,
+      "pinnacleLastUpdate": "2026-09-24T06:27:52Z",
+      "fairProbability": 0.775834312873716,
+      "fairPrice": 1.288934999917659,
+      "fairProbabilityPower": 0.8096489518986196,
+      "bestUk": {
+        "bookmakerKey": "grosvenor",
+        "bookmakerTitle": "Grosvenor",
+        "price": 1.24,
+        "lastUpdate": "2026-09-24T06:28:09Z"
+      },
+      "expectedValue": -0.037965452036592184,
+      "expectedValuePower": 0.00396470035428842,
+      "ukBookmakers": 12
+    },
+    {
+      "providerEventId": "bf2142d1ca76ba2fc9e61afce80f86c0",
+      "commenceTime": "2026-10-17T14:00:00Z",
+      "homeTeam": "Manchester City",
+      "awayTeam": "Ipswich Town",
+      "outcome": "draw",
+      "pinnaclePrice": 7.02,
+      "pinnacleMargin": 0.06523553712203212,
+      "pinnacleLastUpdate": "2026-09-24T06:27:52Z",
+      "fairProbability": 0.13372642714774877,
+      "fairPrice": 7.477953470596665,
+      "fairProbabilityPower": 0.11547636023795625,
+      "bestUk": {
+        "bookmakerKey": "betway",
+        "bookmakerTitle": "Betway",
+        "price": 7,
+        "lastUpdate": "2026-09-24T06:27:21Z"
+      },
+      "expectedValue": -0.0639150099657586,
+      "expectedValuePower": -0.19166547833430625,
+      "ukBookmakers": 12
+    },
+    {
+      "providerEventId": "bf2142d1ca76ba2fc9e61afce80f86c0",
+      "commenceTime": "2026-10-17T14:00:00Z",
+      "homeTeam": "Manchester City",
+      "awayTeam": "Ipswich Town",
+      "outcome": "away",
+      "pinnaclePrice": 10.38,
+      "pinnacleMargin": 0.06523553712203212,
+      "pinnacleLastUpdate": "2026-09-24T06:27:52Z",
+      "fairProbability": 0.09043925997853527,
+      "fairPrice": 11.057144875326696,
+      "fairProbabilityPower": 0.07487468786342412,
+      "bestUk": {
+        "bookmakerKey": "paddypower",
+        "bookmakerTitle": "Paddy Power",
+        "price": 13,
+        "lastUpdate": "2026-09-24T06:27:37Z"
+      },
+      "expectedValue": 0.1757103797209585,
+      "expectedValuePower": -0.02662905777548641,
+      "ukBookmakers": 12
+    },
+    {
+      "providerEventId": "d1bbbdcd3d430e70091b518369b559cf",
+      "commenceTime": "2026-10-17T16:30:00Z",
+      "homeTeam": "Newcastle United",
+      "awayTeam": "Aston Villa",
+      "outcome": "home",
+      "pinnaclePrice": 2.09,
+      "pinnacleMargin": 0.05071147176410351,
+      "pinnacleLastUpdate": "2026-09-24T06:27:52Z",
+      "fairProbability": 0.455376106932763,
+      "fairPrice": 2.195986975986976,
+      "fairProbabilityPower": 0.46156765228134305,
+      "bestUk": {
+        "bookmakerKey": "betfred_uk",
+        "bookmakerTitle": "Betfred (UK)",
+        "price": 2.15,
+        "lastUpdate": "2026-09-24T06:27:37Z"
+      },
+      "expectedValue": -0.020941370094559653,
+      "expectedValuePower": -0.007629547595112474,
+      "ukBookmakers": 12
+    },
+    {
+      "providerEventId": "d1bbbdcd3d430e70091b518369b559cf",
+      "commenceTime": "2026-10-17T16:30:00Z",
+      "homeTeam": "Newcastle United",
+      "awayTeam": "Aston Villa",
+      "outcome": "draw",
+      "pinnaclePrice": 3.78,
+      "pinnacleMargin": 0.05071147176410351,
+      "pinnacleLastUpdate": "2026-09-24T06:27:52Z",
+      "fairProbability": 0.2517820273781679,
+      "fairPrice": 3.9716893632683106,
+      "fairProbabilityPower": 0.24793351654833296,
+      "bestUk": {
+        "bookmakerKey": "paddypower",
+        "bookmakerTitle": "Paddy Power",
+        "price": 3.8,
+        "lastUpdate": "2026-09-24T06:27:37Z"
+      },
+      "expectedValue": -0.04322829596296196,
+      "expectedValuePower": -0.057852637116334815,
+      "ukBookmakers": 12
+    },
+    {
+      "providerEventId": "d1bbbdcd3d430e70091b518369b559cf",
+      "commenceTime": "2026-10-17T16:30:00Z",
+      "homeTeam": "Newcastle United",
+      "awayTeam": "Aston Villa",
+      "outcome": "away",
+      "pinnaclePrice": 3.25,
+      "pinnacleMargin": 0.05071147176410351,
+      "pinnacleLastUpdate": "2026-09-24T06:27:52Z",
+      "fairProbability": 0.2928418656890691,
+      "fairPrice": 3.414812283233336,
+      "fairProbabilityPower": 0.29049883117032416,
+      "bestUk": {
+        "bookmakerKey": "unibet_uk",
+        "bookmakerTitle": "Unibet (UK)",
+        "price": 3.25,
+        "lastUpdate": "2026-09-24T06:27:54Z"
+      },
+      "expectedValue": -0.04826393651052541,
+      "expectedValuePower": -0.05587879869644652,
+      "ukBookmakers": 12
+    },
+    {
+      "providerEventId": "dfd5d6648be46426e418801584d46a68",
+      "commenceTime": "2026-10-18T13:00:00Z",
+      "homeTeam": "Bournemouth",
+      "awayTeam": "Sunderland",
+      "outcome": "home",
+      "pinnaclePrice": 1.98,
+      "pinnacleMargin": 0.051645487129358125,
+      "pinnacleLastUpdate": "2026-09-24T06:27:52Z",
+      "fairProbability": 0.48024786986831913,
+      "fairPrice": 2.082258064516129,
+      "fairProbabilityPower": 0.4879703151659838,
+      "bestUk": {
+        "bookmakerKey": "unibet_uk",
+        "bookmakerTitle": "Unibet (UK)",
+        "price": 2,
+        "lastUpdate": "2026-09-24T06:27:54Z"
+      },
+      "expectedValue": -0.039504260263361735,
+      "expectedValuePower": -0.02405936966803235,
+      "ukBookmakers": 12
+    },
+    {
+      "providerEventId": "dfd5d6648be46426e418801584d46a68",
+      "commenceTime": "2026-10-18T13:00:00Z",
+      "homeTeam": "Bournemouth",
+      "awayTeam": "Sunderland",
+      "outcome": "draw",
+      "pinnaclePrice": 3.6,
+      "pinnacleMargin": 0.051645487129358125,
+      "pinnacleLastUpdate": "2026-09-24T06:27:52Z",
+      "fairProbability": 0.2641363284275755,
+      "fairPrice": 3.7859237536656893,
+      "fairProbabilityPower": 0.2604231444668959,
+      "bestUk": {
+        "bookmakerKey": "betfred_uk",
+        "bookmakerTitle": "Betfred (UK)",
+        "price": 3.75,
+        "lastUpdate": "2026-09-24T06:27:37Z"
+      },
+      "expectedValue": -0.009488768396591851,
+      "expectedValuePower": -0.023413208249140394,
+      "ukBookmakers": 12
+    },
+    {
+      "providerEventId": "dfd5d6648be46426e418801584d46a68",
+      "commenceTime": "2026-10-18T13:00:00Z",
+      "homeTeam": "Bournemouth",
+      "awayTeam": "Sunderland",
+      "outcome": "away",
+      "pinnaclePrice": 3.72,
+      "pinnacleMargin": 0.051645487129358125,
+      "pinnacleLastUpdate": "2026-09-24T06:27:52Z",
+      "fairProbability": 0.2556158017041053,
+      "fairPrice": 3.9121212121212126,
+      "fairProbabilityPower": 0.25160654036712027,
+      "bestUk": {
+        "bookmakerKey": "betfred_uk",
+        "bookmakerTitle": "Betfred (UK)",
+        "price": 3.75,
+        "lastUpdate": "2026-09-24T06:27:37Z"
+      },
+      "expectedValue": -0.041440743609605146,
+      "expectedValuePower": -0.056475473623298966,
+      "ukBookmakers": 12
+    },
+    {
+      "providerEventId": "9fc08b390a49c4434f7cf631a0bb88fb",
+      "commenceTime": "2026-10-18T13:00:00Z",
+      "homeTeam": "Brighton and Hove Albion",
+      "awayTeam": "Crystal Palace",
+      "outcome": "home",
+      "pinnaclePrice": 1.53,
+      "pinnacleMargin": 0.05556333513599565,
+      "pinnacleLastUpdate": "2026-09-24T06:27:52Z",
+      "fairProbability": 0.6191904829259941,
+      "fairPrice": 1.6150119027580732,
+      "fairProbabilityPower": 0.6364007643547397,
+      "bestUk": {
+        "bookmakerKey": "grosvenor",
+        "bookmakerTitle": "Grosvenor",
+        "price": 1.57,
+        "lastUpdate": "2026-09-24T06:28:09Z"
+      },
+      "expectedValue": -0.02787094180618921,
+      "expectedValuePower": -0.0008507999630587015,
+      "ukBookmakers": 12
+    },
+    {
+      "providerEventId": "9fc08b390a49c4434f7cf631a0bb88fb",
+      "commenceTime": "2026-10-18T13:00:00Z",
+      "homeTeam": "Brighton and Hove Albion",
+      "awayTeam": "Crystal Palace",
+      "outcome": "draw",
+      "pinnaclePrice": 4.57,
+      "pinnacleMargin": 0.05556333513599565,
+      "pinnacleLastUpdate": "2026-09-24T06:27:52Z",
+      "fairProbability": 0.20730009603430435,
+      "fairPrice": 4.8239244415715,
+      "fairProbabilityPower": 0.19893682707681118,
+      "bestUk": {
+        "bookmakerKey": "grosvenor",
+        "bookmakerTitle": "Grosvenor",
+        "price": 4.5,
+        "lastUpdate": "2026-09-24T06:28:09Z"
+      },
+      "expectedValue": -0.06714956784563042,
+      "expectedValuePower": -0.10478427815434965,
+      "ukBookmakers": 12
+    },
+    {
+      "providerEventId": "9fc08b390a49c4434f7cf631a0bb88fb",
+      "commenceTime": "2026-10-18T13:00:00Z",
+      "homeTeam": "Brighton and Hove Albion",
+      "awayTeam": "Crystal Palace",
+      "outcome": "away",
+      "pinnaclePrice": 5.46,
+      "pinnacleMargin": 0.05556333513599565,
+      "pinnacleLastUpdate": "2026-09-24T06:27:52Z",
+      "fairProbability": 0.17350942103970163,
+      "fairPrice": 5.763375809842536,
+      "fairProbabilityPower": 0.1646624085684492,
+      "bestUk": {
+        "bookmakerKey": "betfred_uk",
+        "bookmakerTitle": "Betfred (UK)",
+        "price": 5.5,
+        "lastUpdate": "2026-09-24T06:27:37Z"
+      },
+      "expectedValue": -0.045698184281641074,
+      "expectedValuePower": -0.09435675287352951,
+      "ukBookmakers": 12
+    },
+    {
+      "providerEventId": "676b3b0b609e9cf565da450786618d26",
+      "commenceTime": "2026-10-18T13:00:00Z",
+      "homeTeam": "Leeds United",
+      "awayTeam": "Manchester United",
+      "outcome": "home",
+      "pinnaclePrice": 2.79,
+      "pinnacleMargin": 0.05019761159739433,
+      "pinnacleLastUpdate": "2026-09-24T06:27:52Z",
+      "fairProbability": 0.34129094858911757,
+      "fairPrice": 2.93005133635673,
+      "fairProbabilityPower": 0.3414572108705538,
+      "bestUk": {
+        "bookmakerKey": "grosvenor",
+        "bookmakerTitle": "Grosvenor",
+        "price": 2.88,
+        "lastUpdate": "2026-09-24T06:28:09Z"
+      },
+      "expectedValue": -0.01708206806334145,
+      "expectedValuePower": -0.01660323269280506,
+      "ukBookmakers": 12
+    },
+    {
+      "providerEventId": "676b3b0b609e9cf565da450786618d26",
+      "commenceTime": "2026-10-18T13:00:00Z",
+      "homeTeam": "Leeds United",
+      "awayTeam": "Manchester United",
+      "outcome": "draw",
+      "pinnaclePrice": 3.59,
+      "pinnacleMargin": 0.05019761159739433,
+      "pinnacleLastUpdate": "2026-09-24T06:27:52Z",
+      "fairProbability": 0.2652372553102056,
+      "fairPrice": 3.7702094256346452,
+      "fairProbabilityPower": 0.26222341677917765,
+      "bestUk": {
+        "bookmakerKey": "grosvenor",
+        "bookmakerTitle": "Grosvenor",
+        "price": 3.75,
+        "lastUpdate": "2026-09-24T06:28:09Z"
+      },
+      "expectedValue": -0.0053602925867290985,
+      "expectedValuePower": -0.016662187078083757,
+      "ukBookmakers": 12
+    },
+    {
+      "providerEventId": "676b3b0b609e9cf565da450786618d26",
+      "commenceTime": "2026-10-18T13:00:00Z",
+      "homeTeam": "Leeds United",
+      "awayTeam": "Manchester United",
+      "outcome": "away",
+      "pinnaclePrice": 2.42,
+      "pinnacleMargin": 0.05019761159739433,
+      "pinnacleLastUpdate": "2026-09-24T06:27:52Z",
+      "fairProbability": 0.39347179610067684,
+      "fairPrice": 2.5414782200656942,
+      "fairProbabilityPower": 0.39631937235026843,
+      "bestUk": {
+        "bookmakerKey": "williamhill",
+        "bookmakerTitle": "William Hill",
+        "price": 2.4,
+        "lastUpdate": "2026-09-24T06:27:53Z"
+      },
+      "expectedValue": -0.05566768935837563,
+      "expectedValuePower": -0.048833506359355794,
+      "ukBookmakers": 12
+    },
+    {
+      "providerEventId": "f696a248965373d9071dc0662e5c58a8",
+      "commenceTime": "2026-10-18T15:30:00Z",
+      "homeTeam": "Nottingham Forest",
+      "awayTeam": "Arsenal",
+      "outcome": "home",
+      "pinnaclePrice": 5.89,
+      "pinnacleMargin": 0.057333507814548934,
+      "pinnacleLastUpdate": "2026-09-24T06:27:52Z",
+      "fairProbability": 0.16057306958702133,
+      "fairPrice": 6.227694361027693,
+      "fairProbabilityPower": 0.1519781053473754,
+      "bestUk": {
+        "bookmakerKey": "grosvenor",
+        "bookmakerTitle": "Grosvenor",
+        "price": 6,
+        "lastUpdate": "2026-09-24T06:28:09Z"
+      },
+      "expectedValue": -0.036561582477872,
+      "expectedValuePower": -0.0881313679157476,
+      "ukBookmakers": 12
+    },
+    {
+      "providerEventId": "f696a248965373d9071dc0662e5c58a8",
+      "commenceTime": "2026-10-18T15:30:00Z",
+      "homeTeam": "Nottingham Forest",
+      "awayTeam": "Arsenal",
+      "outcome": "draw",
+      "pinnaclePrice": 3.7,
+      "pinnacleMargin": 0.057333507814548934,
+      "pinnacleLastUpdate": "2026-09-24T06:27:52Z",
+      "fairProbability": 0.2556149675317717,
+      "fairPrice": 3.912133978913832,
+      "fairProbabilityPower": 0.2490615666643965,
+      "bestUk": {
+        "bookmakerKey": "grosvenor",
+        "bookmakerTitle": "Grosvenor",
+        "price": 4.1,
+        "lastUpdate": "2026-09-24T06:28:09Z"
+      },
+      "expectedValue": 0.048021366880263816,
+      "expectedValuePower": 0.02115242332402545,
+      "ukBookmakers": 12
+    },
+    {
+      "providerEventId": "f696a248965373d9071dc0662e5c58a8",
+      "commenceTime": "2026-10-18T15:30:00Z",
+      "homeTeam": "Nottingham Forest",
+      "awayTeam": "Arsenal",
+      "outcome": "away",
+      "pinnaclePrice": 1.62,
+      "pinnacleMargin": 0.057333507814548934,
+      "pinnacleLastUpdate": "2026-09-24T06:27:52Z",
+      "fairProbability": 0.5838119628812071,
+      "fairPrice": 1.7128802826595695,
+      "fairProbabilityPower": 0.5989603279882281,
+      "bestUk": {
+        "bookmakerKey": "williamhill",
+        "bookmakerTitle": "William Hill",
+        "price": 1.62,
+        "lastUpdate": "2026-09-24T06:27:53Z"
+      },
+      "expectedValue": -0.054224620132444445,
+      "expectedValuePower": -0.02968426865907048,
+      "ukBookmakers": 12
+    },
+    {
+      "providerEventId": "9baaf4e48b041cfef04e70e42532502e",
+      "commenceTime": "2026-10-19T19:00:00Z",
+      "homeTeam": "Tottenham Hotspur",
+      "awayTeam": "Coventry City",
+      "outcome": "home",
+      "pinnaclePrice": 1.49,
+      "pinnacleMargin": 0.05802654723205425,
+      "pinnacleLastUpdate": "2026-09-24T06:27:52Z",
+      "fairProbability": 0.6343327975589216,
+      "fairPrice": 1.5764595553757608,
+      "fairProbabilityPower": 0.6533765182065436,
+      "bestUk": {
+        "bookmakerKey": "grosvenor",
+        "bookmakerTitle": "Grosvenor",
+        "price": 1.5,
+        "lastUpdate": "2026-09-24T06:28:09Z"
+      },
+      "expectedValue": -0.048500803661617686,
+      "expectedValuePower": -0.01993522269018455,
+      "ukBookmakers": 12
+    },
+    {
+      "providerEventId": "9baaf4e48b041cfef04e70e42532502e",
+      "commenceTime": "2026-10-19T19:00:00Z",
+      "homeTeam": "Tottenham Hotspur",
+      "awayTeam": "Coventry City",
+      "outcome": "draw",
+      "pinnaclePrice": 4.57,
+      "pinnacleMargin": 0.05802654723205425,
+      "pinnacleLastUpdate": "2026-09-24T06:27:52Z",
+      "fairProbability": 0.20681747666581907,
+      "fairPrice": 4.835181320850488,
+      "fairProbabilityPower": 0.1975565143881597,
+      "bestUk": {
+        "bookmakerKey": "grosvenor",
+        "bookmakerTitle": "Grosvenor",
+        "price": 4.7,
+        "lastUpdate": "2026-09-24T06:28:09Z"
+      },
+      "expectedValue": -0.027957859670650342,
+      "expectedValuePower": -0.07148438237564947,
+      "ukBookmakers": 12
+    },
+    {
+      "providerEventId": "9baaf4e48b041cfef04e70e42532502e",
+      "commenceTime": "2026-10-19T19:00:00Z",
+      "homeTeam": "Tottenham Hotspur",
+      "awayTeam": "Coventry City",
+      "outcome": "away",
+      "pinnaclePrice": 5.95,
+      "pinnacleMargin": 0.05802654723205425,
+      "pinnacleLastUpdate": "2026-09-24T06:27:52Z",
+      "fairProbability": 0.15884972577525933,
+      "fairPrice": 6.295257956030723,
+      "fairProbabilityPower": 0.14906696740529662,
+      "bestUk": {
+        "bookmakerKey": "grosvenor",
+        "bookmakerTitle": "Grosvenor",
+        "price": 6.25,
+        "lastUpdate": "2026-09-24T06:28:09Z"
+      },
+      "expectedValue": -0.0071892139046292325,
+      "expectedValuePower": -0.06833145371689608,
+      "ukBookmakers": 12
+    }
+  ]
+}

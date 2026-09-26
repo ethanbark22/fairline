@@ -2,10 +2,13 @@ import { describe, expect, it } from "vitest";
 import {
   bookmakerMargin,
   edge,
+  expectedValue,
+  fairPrice,
   impliedProbability,
   minimumPrice,
   priceQualifies,
   removeMargin,
+  removeMarginPower,
 } from "./value";
 
 // Worked example used across tests: a made-up home / draw / away market.
@@ -125,5 +128,65 @@ describe("priceQualifies", () => {
     expect(priceQualifies(1.72, min)).toBe(true);
     expect(priceQualifies(min, min)).toBe(true);
     expect(priceQualifies(1.65, min)).toBe(false);
+  });
+});
+
+describe("fairPrice", () => {
+  it("is 1 / probability", () => {
+    expect(fairPrice(0.5)).toBe(2);
+    expect(fairPrice(0.25)).toBe(4);
+  });
+
+  it("turns a margin-removed market back into prices whose implied chances add up to 1", () => {
+    const fair = removeMargin(HOME_DRAW_AWAY).map(fairPrice);
+    expect(fair.reduce((s, price) => s + 1 / price, 0)).toBeCloseTo(1, 12);
+    fair.forEach((price, i) => expect(price).toBeGreaterThan(HOME_DRAW_AWAY[i]));
+  });
+
+  it("rejects probabilities outside 0 to 1", () => {
+    expect(() => fairPrice(0)).toThrow(RangeError);
+    expect(() => fairPrice(1)).toThrow(RangeError);
+  });
+});
+
+describe("expectedValue", () => {
+  it("is zero at the fair price", () => {
+    expect(expectedValue(fairPrice(0.4), 0.4)).toBeCloseTo(0, 12);
+  });
+
+  it("is price x probability - 1", () => {
+    expect(expectedValue(2.2, 0.5)).toBeCloseTo(0.1, 12);
+    expect(expectedValue(1.9, 0.5)).toBeCloseTo(-0.05, 12);
+  });
+
+  it("is negative for every outcome when betting into a bookmaker's own margin-free view", () => {
+    const probs = removeMargin(HOME_DRAW_AWAY);
+    HOME_DRAW_AWAY.forEach((price, i) => expect(expectedValue(price, probs[i])).toBeLessThan(0));
+  });
+
+  it("rejects bad inputs", () => {
+    expect(() => expectedValue(1, 0.5)).toThrow(RangeError);
+    expect(() => expectedValue(2, 1.5)).toThrow(RangeError);
+  });
+});
+
+describe("removeMarginPower", () => {
+  it("adds up to 1 and keeps the order of the outcomes", () => {
+    const probs = removeMarginPower(HOME_DRAW_AWAY);
+    expect(probs.reduce((a, b) => a + b, 0)).toBeCloseTo(1, 12);
+    expect(probs[0]).toBeGreaterThan(probs[1]);
+    expect(probs[1]).toBeGreaterThan(probs[2]);
+  });
+
+  it("leaves a fair market unchanged", () => {
+    const probs = removeMarginPower([2, 4, 4]);
+    expect(probs[0]).toBeCloseTo(0.5, 9);
+    expect(probs[1]).toBeCloseTo(0.25, 9);
+  });
+
+  it("takes more margin off the longshot than the proportional method does", () => {
+    const prices = [1.3, 5.5, 11];
+    expect(removeMarginPower(prices)[2]).toBeLessThan(removeMargin(prices)[2]);
+    expect(removeMarginPower(prices)[0]).toBeGreaterThan(removeMargin(prices)[0]);
   });
 });

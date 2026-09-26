@@ -285,9 +285,22 @@ xG add-on (about €53/mo). My recommendation is to start without xG — add it 
 we know the stats-and-price format is working — but it's your call since it's
 your budget.
 
-## The Odds API (live odds) — not in use yet
+## The Odds API (live odds) — free plan, research use only so far
 
-Planned for live odds (see `docs/PLAN.md`). Read the terms before the first call.
+**Used for:** a one-off research check comparing UK bookmakers with Pinnacle
+(`npm run odds:compare`, results in `docs/research/uk-vs-pinnacle/`). The key is
+in the environment variable ODDS_API_KEY, and is never stored in the repo or printed.
+
+**Free plan:** 500 credits a month. `/sports` and `/events` are free. `/odds` costs
+1 credit per market per region, whatever the number of fixtures returned
+(confirmed by the API's own usage counters on 24 Sept 2026). Pinnacle is in the
+`eu` region; UK bookmakers are in `uk`. Our research budget: at most 150 credits.
+
+**Stored:** only our calculations (fair prices, best UK prices, expected value),
+never the raw responses.
+
+**Terms:** our build environment can't open the-odds-api.com's website (only the
+API is allowed), so the terms have not yet been read first-hand. Read them before any public use.
 The plan notes two clauses that need a legal read: display is allowed only
 "provided the data isn't the primary product being sold", and the data must not
 be resold as a standalone product. The terms read so far say nothing about

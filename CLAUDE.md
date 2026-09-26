@@ -63,6 +63,7 @@ Fill these in once the project is scaffolded, and keep them current.
 - Tests: `npm test` (database tests also run when `TEST_DATABASE_URL` is set; see README)
 - Type check: `npm run typecheck`
 - Lint: `npm run lint`
+- UK vs Pinnacle price check (2 Odds API credits per run, never in a loop): `npm run odds:compare`
 - Database migrations: `supabase/migrations/` (numbered files, never edit one after it has been applied; add a new one). Seed data: `supabase/seed.sql`
 
 `npm run data:fetch`, `npm run backtest` and `npm run backtest:v2` are left over from the earlier in-house probability model, which the product has moved away from (see `docs/PLAN.md`, "Changes to the brief"). They still run, but they are not part of the current build — see Current focus below.

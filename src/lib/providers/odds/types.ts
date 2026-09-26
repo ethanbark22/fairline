@@ -91,9 +91,20 @@ export interface OutcomePriceComparison {
   current: PriceMovementPoint;
 }
 
+/** A betting market we cover. Match winner is 1X2; the others are Over/Under totals. */
+export type MarketKey = "match_winner" | "total_corners" | "total_cards";
+
+export interface MarketPriceComparison {
+  market: MarketKey;
+  marketLabel: string;
+  /** The Over/Under line, e.g. 9.5 corners. Not present for match_winner. */
+  line?: number;
+  outcomes: OutcomePriceComparison[];
+}
+
 export interface PriceComparison {
   fixtureId: string;
-  outcomes: OutcomePriceComparison[];
+  markets: MarketPriceComparison[];
 }
 
 export interface OddsProvider {

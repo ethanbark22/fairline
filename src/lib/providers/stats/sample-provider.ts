@@ -132,12 +132,12 @@ const STATS_SAMPLE_SIZE = 6;
 const STATS_DESCRIPTION = "average of the last 6 Premier League matches";
 
 const SAMPLE_MATCH_STATS: Record<SampleTeamId, Omit<MatchStatAverages, "teamId" | "teamName" | "sampleSize" | "sampleDescription">> = {
-  arsenal: { shotsPerGame: 15.2, shotsOnTargetPerGame: 5.8, possessionPct: 58, cornersPerGame: 6.7 },
-  chelsea: { shotsPerGame: 13.5, shotsOnTargetPerGame: 4.9, possessionPct: 54, cornersPerGame: 5.8 },
-  liverpool: { shotsPerGame: 16.1, shotsOnTargetPerGame: 6.3, possessionPct: 61, cornersPerGame: 7.2 },
-  "man-city": { shotsPerGame: 17.4, shotsOnTargetPerGame: 6.9, possessionPct: 64, cornersPerGame: 7.5 },
-  newcastle: { shotsPerGame: 12.8, shotsOnTargetPerGame: 4.6, possessionPct: 49, cornersPerGame: 5.4 },
-  "man-utd": { shotsPerGame: 12.1, shotsOnTargetPerGame: 4.2, possessionPct: 51, cornersPerGame: 5.1 },
+  arsenal: { shotsPerGame: 15.2, shotsOnTargetPerGame: 5.8, possessionPct: 58, cornersPerGame: 6.7, cardsPerGame: 1.8 },
+  chelsea: { shotsPerGame: 13.5, shotsOnTargetPerGame: 4.9, possessionPct: 54, cornersPerGame: 5.8, cardsPerGame: 2.3 },
+  liverpool: { shotsPerGame: 16.1, shotsOnTargetPerGame: 6.3, possessionPct: 61, cornersPerGame: 7.2, cardsPerGame: 1.6 },
+  "man-city": { shotsPerGame: 17.4, shotsOnTargetPerGame: 6.9, possessionPct: 64, cornersPerGame: 7.5, cardsPerGame: 1.5 },
+  newcastle: { shotsPerGame: 12.8, shotsOnTargetPerGame: 4.6, possessionPct: 49, cornersPerGame: 5.4, cardsPerGame: 2.6 },
+  "man-utd": { shotsPerGame: 12.1, shotsOnTargetPerGame: 4.2, possessionPct: 51, cornersPerGame: 5.1, cardsPerGame: 2.1 },
 };
 
 function assertSampleTeam(teamId: string): asserts teamId is SampleTeamId {

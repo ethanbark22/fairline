@@ -23,10 +23,10 @@ export interface SlipAnalysis {
 
 function legAnalysisText(selection: BetslipSelection): string {
   return (
-    `Sample analysis: ${selection.homeTeam} v ${selection.awayTeam}, ${selection.outcome} @ ` +
-    `${selection.price.toFixed(2)} (${selection.bookmaker}). The full version will pull this ` +
-    `fixture's recent form, head-to-head record and match stats and have Claude summarise them ` +
-    `here — for now this is placeholder text so the flow can be reviewed before that's built.`
+    `Sample analysis: ${selection.homeTeam} v ${selection.awayTeam}, ${selection.marketLabel} — ` +
+    `${selection.outcome} @ ${selection.price.toFixed(2)} (${selection.bookmaker}). The full version ` +
+    `will pull this fixture's recent form, head-to-head record and match stats and have Claude ` +
+    `summarise them here — for now this is placeholder text so the flow can be reviewed before that's built.`
   );
 }
 
@@ -36,7 +36,7 @@ export function buildSlipAnalysis(selections: readonly BetslipSelection[]): Slip
 
   const correlationWarning = correlation.correlated
     ? correlation.sharedFixtures.length > 0
-      ? "Two of these selections are from the same match — a combined price for mutually exclusive outcomes doesn't mean anything."
+      ? "More than one selection is from the same match (different markets) — those outcomes are not independent, so treat any combined chance as uncertain, not as a fact."
       : `${correlation.sharedTeams.join(", ")} ${correlation.sharedTeams.length > 1 ? "appear" : "appears"} in more than one selection. These legs are not independent, so treat any combined chance as uncertain, not as a fact.`
     : null;
 

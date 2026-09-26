@@ -11,7 +11,12 @@ import { pinnacleFairPrices, summarisePriceMovement, type PriceDirection } from 
 import { SampleFootballStatsProvider } from "@/lib/providers/stats/sample-provider";
 import type { FootballStatsProvider, HeadToHead, TeamForm, MatchStatAverages } from "@/lib/providers/stats/types";
 import { SampleOddsProvider } from "@/lib/providers/odds/sample-provider";
-import type { BestUkPrice, OddsProvider } from "@/lib/providers/odds/types";
+import type {
+  BestUkPrice,
+  MarketKey,
+  MarketPriceComparison,
+  OddsProvider,
+} from "@/lib/providers/odds/types";
 import { getSampleTeamId } from "@/lib/sample-data/teams";
 
 // Sample data for now — see docs/PLAN.md, "Go or no-go on paying for stats
@@ -22,39 +27,6 @@ const oddsProvider: OddsProvider = new SampleOddsProvider();
 
 const COMPETITION = "Premier League";
 
-export interface FixtureOutcomeSummary {
-  outcome: string;
-  bestUk: BestUkPrice;
-  fairPrice: number;
-}
-
-export interface FixtureListItem {
-  fixtureId: string;
-  competition: string;
-  homeTeam: string;
-  awayTeam: string;
-  kickoff: string;
-  outcomes: FixtureOutcomeSummary[];
-}
-
-export async function listFixtures(): Promise<FixtureListItem[]> {
-  const fixtures = await oddsProvider.getUpcomingFixtures(COMPETITION);
-  return Promise.all(
-    fixtures.map(async (fixture) => {
-      const comparison = await oddsProvider.getPriceComparison(fixture.fixtureId);
-      const fair = pinnacleFairPrices(comparison.outcomes.map((o) => o.pinnaclePrice));
-      return {
-        ...fixture,
-        outcomes: comparison.outcomes.map((o, i) => ({
-          outcome: o.outcome,
-          bestUk: o.bestUk,
-          fairPrice: fair[i].price,
-        })),
-      };
-    }),
-  );
-}
-
 export interface MatchOutcomeView {
   outcome: string;
   bestUk: BestUkPrice;
@@ -64,6 +36,77 @@ export interface MatchOutcomeView {
   currentPrice: number;
   direction: PriceDirection;
   changePct: number;
+}
+
+export interface MatchMarketView {
+  market: MarketKey;
+  marketLabel: string;
+  line?: number;
+  outcomes: MatchOutcomeView[];
+  pinnacleMarginPct: number;
+}
+
+function buildMarketView(comparison: MarketPriceComparison): MatchMarketView {
+  const pinnaclePrices = comparison.outcomes.map((o) => o.pinnaclePrice);
+  const fair = pinnacleFairPrices(pinnaclePrices);
+
+  const outcomes: MatchOutcomeView[] = comparison.outcomes.map((o, i) => {
+    const movement = summarisePriceMovement(o.opening.price, o.current.price);
+    return {
+      outcome: o.outcome,
+      bestUk: o.bestUk,
+      fairPrice: fair[i].price,
+      fairProbability: fair[i].probability,
+      openingPrice: o.opening.price,
+      currentPrice: o.current.price,
+      direction: movement.direction,
+      changePct: movement.changePct,
+    };
+  });
+
+  return {
+    market: comparison.market,
+    marketLabel: comparison.marketLabel,
+    line: comparison.line,
+    outcomes,
+    pinnacleMarginPct: bookmakerMargin(pinnaclePrices),
+  };
+}
+
+export interface FixtureListItem {
+  fixtureId: string;
+  competition: string;
+  homeTeam: string;
+  awayTeam: string;
+  kickoff: string;
+  /** The Match Winner market only — the fixtures list stays to one market, like a sportsbook's front page. */
+  outcomes: MatchOutcomeView[];
+  /** Labels for the other markets available on the match page, e.g. "Total Corners O/U 9.5". */
+  otherMarketLabels: string[];
+}
+
+function marketDisplayLabel(market: MarketPriceComparison): string {
+  return market.line !== undefined ? `${market.marketLabel} O/U ${market.line}` : market.marketLabel;
+}
+
+export async function listFixtures(): Promise<FixtureListItem[]> {
+  const fixtures = await oddsProvider.getUpcomingFixtures(COMPETITION);
+  return Promise.all(
+    fixtures.map(async (fixture) => {
+      const comparison = await oddsProvider.getPriceComparison(fixture.fixtureId);
+      const matchWinner = comparison.markets.find((m) => m.market === "match_winner");
+      if (!matchWinner) {
+        throw new RangeError(`Fixture "${fixture.fixtureId}" has no match_winner market`);
+      }
+      return {
+        ...fixture,
+        outcomes: buildMarketView(matchWinner).outcomes,
+        otherMarketLabels: comparison.markets
+          .filter((m) => m.market !== "match_winner")
+          .map(marketDisplayLabel),
+      };
+    }),
+  );
 }
 
 export interface TeamMatchView {
@@ -86,8 +129,7 @@ export interface MatchView {
   home: TeamMatchView;
   away: TeamMatchView;
   headToHead: HeadToHead;
-  outcomes: MatchOutcomeView[];
-  pinnacleMarginPct: number;
+  markets: MatchMarketView[];
   sampleSummary: SampleSummary;
 }
 
@@ -108,23 +150,6 @@ export async function getMatchView(fixtureId: string): Promise<MatchView | null>
     oddsProvider.getPriceComparison(fixtureId),
   ]);
 
-  const pinnaclePrices = comparison.outcomes.map((o) => o.pinnaclePrice);
-  const fair = pinnacleFairPrices(pinnaclePrices);
-
-  const outcomes: MatchOutcomeView[] = comparison.outcomes.map((o, i) => {
-    const movement = summarisePriceMovement(o.opening.price, o.current.price);
-    return {
-      outcome: o.outcome,
-      bestUk: o.bestUk,
-      fairPrice: fair[i].price,
-      fairProbability: fair[i].probability,
-      openingPrice: o.opening.price,
-      currentPrice: o.current.price,
-      direction: movement.direction,
-      changePct: movement.changePct,
-    };
-  });
-
   return {
     fixtureId,
     competition: fixture.competition,
@@ -132,8 +157,7 @@ export async function getMatchView(fixtureId: string): Promise<MatchView | null>
     home: { teamId: homeId, teamName: fixture.homeTeam, form: homeForm, stats: homeStats },
     away: { teamId: awayId, teamName: fixture.awayTeam, form: awayForm, stats: awayStats },
     headToHead,
-    outcomes,
-    pinnacleMarginPct: bookmakerMargin(pinnaclePrices),
+    markets: comparison.markets.map(buildMarketView),
     sampleSummary: buildSampleSummary(fixture.homeTeam, fixture.awayTeam, homeForm, awayForm, headToHead),
   };
 }

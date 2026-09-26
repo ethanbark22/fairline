@@ -1,11 +1,11 @@
 In plain English
 
-We are building a website where you pick a football match, and it shows what the bookmakers' prices imply, what our own maths says, whether there is a gap in your favour, and how much to trust that answer. It never takes bets and never promises wins.
+We are building a website where you pick a Premier League match, and it shows you the facts a careful bettor would check by hand: recent form, the head-to-head record, and shots/possession/corners, next to what the bookmakers are offering — the best UK price, Pinnacle's price with its margin taken out (a fair-price reference point), and how the price has moved. Claude writes a short plain-English summary of the match and points out what could go wrong, using only the numbers we give it. It never predicts a result, never scores an "edge", and never takes bets or promises wins.
 
-Where the numbers come from. A paid odds service supplies bookmaker prices. Our own code turns them into probabilities. Claude only writes the explanation and points out risks; it does not make up the numbers.
-What it costs. About $30 a month for odds data (only once the model has proved itself), plus roughly one or two US cents each time someone runs an analysis.
+Where the numbers come from. A stats service (Sportmonks) supplies form, head-to-head and match stats. A paid odds service (The Odds API) supplies bookmaker prices. Our own code removes Pinnacle's margin to get a fair price and works out how prices have moved. Claude only writes the words; it does not make up any number, and every stat we show carries the sample size it's based on.
+What it costs. About €29/month (~£25) for stats once we sign up, plus about $30/month for odds once the model has proved itself worth building on, plus roughly one or two US cents each time someone reads a match summary.
 What you do. Create a few accounts, paste in two keys, approve the changes Claude Code proposes, and check that the screens look right.
-What we build first. One league, one type of bet, working end to end. Everything else waits until that works.
+What we build first. One league, one screen, working on sample data before any money is spent. Everything else waits until that works.
 What could stop a public launch. Data licence questions and UK gambling advertising rules. These need proper advice, not just code.
 
 Words you will keep seeing
@@ -13,138 +13,119 @@ Words you will keep seeing
 Term	What it means
 Repo	The project's folder of code stored on GitHub, with a full history of changes
 Branch and pull request (PR)	A safe copy where Claude Code makes changes; the PR is a proposal you approve before it joins the real code
-API	A way for our app to ask another service for data, such as bookmaker prices
+API	A way for our app to ask another service for data, such as bookmaker prices or match stats
 API key	A secret password that lets our app use that service; never share it or paste it in public
 Environment variable	A safe place to store a key so it is not written in the code
-Database (Supabase)	Where all our information is stored: matches, prices, saved predictions, users
+Database (Supabase)	Where all our information is stored: matches, prices, stats, users
 Migration	A numbered instruction that sets up or changes the database tables
 Cron job	A task that runs by itself on a timer, like fetching new prices every 30 minutes
 Deploy (Vercel)	Putting the latest version of the site live on the internet
 Odds and implied probability	A price of 2.00 means the bookmaker thinks there is about a 50% chance; higher prices mean lower chances
-Edge	Our estimated chance minus the bookmaker's implied chance; positive means possible value, not a sure win
-Calibration	Checking whether things we call 70% likely really happen about 70% of the time
+Margin (overround)	The extra percentage points a bookmaker builds into a full set of prices, so they add up to more than 100%. Removing it gives a "fair" price.
+Sample size	How many matches or meetings a stat is based on. "3 home wins in 5" is a small sample; we show this next to every stat so nobody mistakes it for a certainty
+Head-to-head	How the same two teams have done against each other in the past
+
 Summary and decisions
 
-We build a greenfield Next.js + Supabase app and prove one loop first: Premier League match winner (1X2), from cached bookmaker odds to a Claude-written analysis stored as an immutable prediction. Nothing else ships until that loop works.
+We build a greenfield Next.js + Supabase app and prove one screen first: a Premier League match page showing recent form, head-to-head, shots/possession/corners and the price comparison, with a Claude-written summary. Nothing else ships until that screen works, and it is built and reviewed on sample data before any provider is paid for.
 
 Decision	Choice	Why
 Starting point	Fresh Next.js (TypeScript, Tailwind, shadcn/ui) repo	No existing repo was connected; wire to Vercel and Supabase once confirmed
-First slice	Premier League, 1X2 (home / draw / away)	The example in the brief; three outcomes, deep bookmaker coverage
-Baseline model	Elo-style ratings feeding a Poisson goals model	Transparent, testable, and calibratable before any ML
+First slice	Premier League, one match page	The example in the brief; deep bookmaker coverage, and Sportmonks covers it from its cheapest paid plan
+Stats source	Sportmonks Starter plan (~€29/month, no expected goals) — not signed up yet	Cheapest option whose own terms clearly allow commercial use; see `docs/DATA_PROVIDERS.md`. We build on sample data until we're ready to pay.
 Odds source	The Odds API behind an OddsProvider interface	Swappable later for SportsDataIO or Sportradar
-Claude's role	Explains and challenges; never computes probability, edge or confidence	Per the brief: numbers come from the model and confidence engine
-Positioning	Research and analysis only, 18+, no bets accepted	Keeps the MVP outside sportsbook licensing
+Claude's role	Writes a short plain-English summary and risks from the numbers we supply; never calculates a stat, a price or anything that looks like a probability	No in-house probability model — see "Changes to the brief" below
+Positioning	Research and price comparison only, 18+, no bets accepted	Keeps the MVP outside sportsbook licensing
 
-Three things I am assuming and will flag again where they matter: scheduled worker routes on Vercel or Supabase (no Redis/BullMQ yet) are enough for ingestion at MVP scale, football match stats come from a free or low-cost source rather than a paid enterprise feed, and the first launch market is the UK.
+Three things I am assuming and will flag again where they matter: scheduled worker routes on Vercel or Supabase (no Redis/BullMQ yet) are enough for ingestion at MVP scale, Sportmonks' Starter plan is enough for form, head-to-head and match stats without expected goals, and the first launch market is the UK.
 
 Budget-first approach (overrides the brief where they differ)
 
-We spend nothing until the model has proved itself, then add costs one at a time as real users appear. Prices are from the Vercel Hobby and Supabase pages, read 24 September 2026.
+We spend nothing until the screens have been reviewed on sample data, then add costs one at a time as real users appear. Prices are from the Vercel Hobby, Supabase and Sportmonks pages, read 24 September 2026.
 
 Item	Cost while building	Cost once live
 GitHub private repo	Free	Free
 Vercel	Free on Hobby, which is limited to non-commercial personal use	From $20/month on Pro, needed once you charge anyone
 Supabase	Free: 500 MB, but projects pause after a week of inactivity	From $25/month on Pro, for backups and no pausing
 The Odds API	Free plan: 500 credits/month, enough to test lightly	$30/month for the 20,000-credit plan
-Claude analysis (Anthropic API)	Prepay a small balance (about $5 to $10) and set a spending cap	About 1 cent per analysis
-Football results data	Free tier or free historical files	Confirm commercial terms before launch
+Sportmonks (football stats)	Not signed up yet; sample data only	Starter plan, ~€29/month (~£25), see `docs/DATA_PROVIDERS.md`
+Claude analysis (Anthropic API)	Prepay a small balance (about $5 to $10) and set a spending cap	About 1 cent per match summary
 
 Your own Claude plan, which powers Claude Code, is separate and not counted here.
 
 The order we spend money in
 
-Build and test everything on free tiers, using free historical results and odds to test the model.
-Run the backtest, which replays past seasons to see how the model would have done. This is the go or no-go point.
-Only if the model holds up, pay $30 for live odds.
+Build and review the fixtures list and match page on clearly labelled sample data. Check the numbers read well and the sample sizes make the stats trustworthy at a glance. This is the go or no-go point.
+Only if the screens hold up, sign up for Sportmonks Starter (stats, ~€29/month) and The Odds API (prices, ~$30/month once past the free credits).
 Launch free, with no payments system. Take Stripe and paid tiers only once people ask for more.
 Move Vercel and Supabase to Pro at the moment you start charging, not before.
 
 Changes to the brief
 
 Brief says	Change to	Why
-Build Stripe, tiers and credits in Phase 8	Free launch first; keep a simple free analysis limit only	No revenue to protect yet, and payments code is costly to build and maintain
+Show a probability, an edge (value) score and a confidence rating, backed by our own model	Drop the in-house model, edge and confidence entirely. Show recent form, head-to-head, shots/possession/corners and the price comparison (best UK price, Pinnacle's fair price, price movement), with a sample size on every stat.	Building and proving a reliable probability model is a much bigger project than this MVP needs. The price-comparison research already run (see `docs/research/`) shows the real gaps between UK bookmakers and Pinnacle's fair price are small and noisy — an honest stats-and-price screen is faster to ship and doesn't risk implying we can predict results.
+Save every analysis as an immutable prediction, for later calibration checking	Drop the prediction ledger. Nothing is "predicted", so there's nothing to grade.	Follows from dropping the model; calibration only matters if we claim a probability.
+Build Stripe, tiers and credits in Phase 8	Free launch first; keep a simple free-summary limit only	No revenue to protect yet, and payments code is costly to build and maintain
 Sentry, PostHog, Redis, BullMQ early	Leave out until there are real users	Each adds cost or complexity for no MVP benefit
-Five sports, many markets	One league and one market until the loop works	Every extra market multiplies odds credits and testing
-Model shown as finding value	Add the bookmakers' average price as a model input, and treat the backtest as the judge	See the warning below
+Five sports, many markets	One league and one screen until it reads well	Every extra market multiplies stats and odds usage, and testing
 
-A plain warning. Bookmaker prices on football match results are already very accurate. A simple ratings model will usually land close to the market, or slightly worse, so early edge numbers will often sit near zero. That is normal, and the honest result to show. The product's real value is clear explanations, price tracking and a transparent record of past predictions, not a promise of finding value every time. The backtest tells us early whether the model adds anything, before you pay for live data.
+A plain warning. Bookmaker prices on football match results are already very accurate, and a simple in-house model would usually land close to the market or slightly worse. Rather than dress that up as an "edge", this product shows the same facts a knowledgeable bettor already checks — form, head-to-head, match stats and the price gap to Pinnacle's fair price — clearly, with their sample sizes, and lets the reader judge. That is a smaller promise, but an honest one, and much cheaper to build and keep correct.
 
 Architecture
 
 Users never touch an upstream sports API: scheduled workers pull, validate and normalise data into Postgres, and the app reads only from our own tables and cache.
 
-Odds APIfixtures + odds
-Cron workersvalidate + normalise
-Stats sourceresults + ratings
-Supabase Postgresappend-only snapshots
-Model layerElo + Poisson
-Value + confidencedeterministic
-Research packet
-Claudestructured JSON
-Prediction ledger+ analysis cache
-Next.js app
+Odds API → fixtures + prices
+Sportmonks → fixtures + form + head-to-head + match stats
+Cron workers → validate + normalise both
+Supabase Postgres → append-only snapshots (odds and stats)
+Price maths → implied probability, margin removal, price movement (deterministic)
+Research packet → Claude → plain-English summary + risks (structured JSON, cached)
+Next.js app → reads only from our own tables and the analysis cache
 
-Read left to right: only the workers talk to providers, and Claude sits after the numbers are already fixed.
+Read left to right: only the workers talk to providers, and Claude sits after the numbers are already fixed and only ever narrates them.
 
-Stack. Next.js App Router with TypeScript, Tailwind and shadcn/ui on Vercel; Supabase Postgres, Auth and row-level security; the Anthropic API for analysis; Stripe later. Ingestion runs as worker routes protected by a shared secret, which is enough at MVP volume. The scheduler depends on your Vercel plan: Hobby cron jobs run at most once a day, Pro allows once a minute. If you are on Hobby, Supabase pg_cron calling the routes is the no-cost alternative. Redis and BullMQ are deferred until polling load or job retries justify them.
+Stack. Next.js App Router with TypeScript, Tailwind and shadcn/ui on Vercel; Supabase Postgres, Auth and row-level security; the Anthropic API for the match summary; Stripe later. Ingestion runs as worker routes protected by a shared secret, which is enough at MVP volume. The scheduler depends on your Vercel plan: Hobby cron jobs run at most once a day, Pro allows once a minute. If you are on Hobby, Supabase pg_cron calling the routes is the no-cost alternative. Redis and BullMQ are deferred until polling load or job retries justify them.
 
-Code layout. Provider and model code sits behind interfaces so nothing in the UI or API depends on a specific vendor.
+Code layout. Provider code sits behind interfaces so nothing in the UI or API depends on a specific vendor. A sample implementation of each interface lets us build and review screens before any provider is paid for.
 
 Module	Responsibility
-lib/providers/odds	OddsProvider interface; OddsApiProvider first, others later
-lib/providers/stats	SportsStatsProvider, InjuryProvider, NewsProvider interfaces
-lib/ingest	Zod-validated fetch, entity mapping, snapshot writes, failure logging
-lib/models	PredictionModel interface; FootballMatchModel v1
-lib/value	Implied probability, margin removal, edge, EV, minimum price
-lib/confidence	Deterministic 0-100 score and LOW / MEDIUM / HIGH label
-lib/ai	Research packet builder, prompt, Claude call, output schema validation
-lib/credits	Ledger-based usage credits with idempotency keys
+lib/providers/odds	OddsProvider interface; SampleOddsProvider now, OddsApiProvider later
+lib/providers/stats	FootballStatsProvider interface; SampleFootballStatsProvider now, SportmonksStatsProvider later (not signed up yet)
+lib/ingest	Zod-validated fetch, entity mapping, snapshot writes, failure logging (built once we're ingesting real data)
+lib/price	Implied probability, margin removal (Pinnacle's fair price), price movement
+lib/ai	Research packet builder, prompt, Claude call, output schema validation — writes prose only, never a number
 app/api/*	Public endpoints; internal worker routes are separate and secret-guarded
 
-Caching. Current odds live in a current_odds view or table refreshed by the worker, so ten users or ten thousand read the same row. Analyses are cached by a hash of event, market, selection, price bucket, research snapshot and model version; a cache hit costs the user credits but not a Claude call. Claude is called only on an analysis request, never on a page view.
+Caching. Current prices and current stats live in views/tables refreshed by the workers, so ten users or ten thousand read the same row. Match summaries are cached by a hash of fixture, stats snapshot, price snapshot and prompt version; a cache hit costs no Claude call. Claude is called only on a summary request, never on a page view.
 
-Polling. Fixture and odds cadence scales with kickoff proximity, using the quota-free events endpoint to detect what is upcoming before spending credits on odds. The exact schedule and its credit maths are in the cost section.
+Polling. Fixture cadence for both providers scales with kickoff proximity, using free/cheap endpoints to detect what is upcoming before spending credits on prices or stats. The exact schedule and its cost maths are in the cost section.
 
 External APIs and licensing
 
-The Odds API covers everything the first slice needs for about $30/month, but its terms include a clause we must clear before launch (see below). Details are from the pricing page, the v4 docs and the terms, read 23 September 2026.
+The Odds API covers bookmaker prices for about $30/month once past the free tier, but its terms include a clause we must clear before launch (see below). Sportmonks covers form, head-to-head and match stats from €29/month, with clearly commercial-friendly terms — see `docs/DATA_PROVIDERS.md` for the full research and quotes. Neither has been signed up for yet.
 
 The Odds API, endpoints we use
 
 Endpoint	Use in MVP	Credit cost
 GET /v4/sports	Confirm soccer_epl is in season	Free
 GET /v4/sports/soccer_epl/events	Fixture list and kickoff times; detect new or changed events	Free
-GET /v4/sports/soccer_epl/odds?regions=uk&markets=h2h	Slice 1: 1X2 prices from UK bookmakers for all upcoming games in one call	1 (markets x regions)
-GET /v4/sports/soccer_epl/odds?markets=h2h,spreads,totals	Later expansion: handicap and totals	3 per region
-GET /v4/sports/soccer_epl/events/{id}/odds	Extended markets (draw_no_bet, btts, player props) per event	Per market x region, per event
-GET /v4/sports/soccer_epl/scores	Settlement results	1 to 2
-Historical odds endpoints	Backtest and closing-line data	10 x markets x regions
+GET /v4/sports/soccer_epl/odds?regions=uk&markets=h2h	Best UK price per outcome for all upcoming games in one call	1 (markets x regions)
+GET /v4/sports/soccer_epl/odds?regions=eu&markets=h2h&bookmakers=pinnacle	Pinnacle's price, margin removed for the fair-price reference	1
+GET /v4/sports/soccer_epl/scores	Confirming a fixture has kicked off, so price movement freezes	1 to 2
+Historical odds endpoints	Price-movement history if we want more than "opening vs current"	10 x markets x regions
 
-Plans. Free is 500 credits/month; $30 gives 20,000, $59 gives 100,000, $119 gives 5M. Historical odds need a paid plan. Extended markets such as player props are only on the per-event endpoint, so they are expensive to poll across a full fixture list. That is why the brief's rule holds: we claim a market only after we have seen it supplied reliably.
+Plans. Free is 500 credits/month; $30 gives 20,000, $59 gives 100,000, $119 gives 5M.
 
-Sports statistics (needed for the model). Match results, goals and fixtures for the Elo and Poisson baseline. Candidates:
+Football stats. Full comparison, pricing and quoted commercial terms are in `docs/DATA_PROVIDERS.md`. Short version: **Sportmonks Starter (~€29/month, ~£25) is the intended source** — its own terms plainly allow commercial use, and its Starter plan covers form, head-to-head and match stats (shots, possession, corners) for up to 5 leagues including the Premier League. It does not include expected goals (xG); that is a further ~€24/month add-on we are not taking yet. **We have not signed up.** Sportmonks' free plan only covers the Danish Superliga and Scottish Premiership, not the Premier League, so it cannot be used to build this slice — see the free-plan note in `docs/DATA_PROVIDERS.md` for the details and the terms we read.
 
-Source	Notes	Status
-football-data.org	Free tier (12 competitions, 10 calls/min); paid tiers from EUR 12 to 199/month	Confirm Premier League is on the free tier and commercial terms
-football-data.co.uk	Free historical CSVs of results with odds columns	Could not be fetched during research; verify terms before using
-The Odds API scores	Results for settlement only, no team stats	Use for settlement, not modelling
-
-Injuries, lineups and news are deliberately left out of slice 1; the data-quality label will show LIMITED until a provider is chosen for them.
-
-Licensing items to resolve, tracked in DATA_PROVIDERS.md. The Odds API terms permit display in an app, indefinite storage, derived calculations and model training. Two clauses need a legal read: the display permission applies "provided the data isn't the primary product being sold", and there is a ban on reselling data as a standalone product. Our subscription sells analysis, but odds are shown prominently, and the Elite bookmaker-comparison tier gets close to that line. The terms also expect responsible gambling messaging. I found no rules on bookmaker names or logos, or affiliate links, so we must ask the provider in writing. Rate limits were not stated on the pages I read.
+Licensing items to resolve, tracked in `docs/DATA_PROVIDERS.md`. The Odds API terms permit display in an app, indefinite storage, derived calculations and model training. Two clauses need a legal read: the display permission applies "provided the data isn't the primary product being sold", and there is a ban on reselling data as a standalone product. Our price-comparison screen shows odds prominently, so this needs a written answer from the provider before launch. The terms also expect responsible gambling messaging. I found no rules on bookmaker names or logos, or affiliate links, so we must ask the provider in writing.
 
 Database schema and migrations
 
-The schema follows the brief's conceptual list, delivered in five migrations so slice 1 needs only the first four. Two rules are enforced in the database, not just in code: odds history is append-only, and predictions cannot be edited after insert.
+Migrations `0001_reference` and `0002_events_odds` are unchanged and still what this slice needs: canonical teams/bookmakers/provider_mappings, and the append-only `odds_snapshots` table. `0003_model` and `0004_ledger`, built for the earlier probability-model approach, are already applied and stay in the repo and its history, but nothing in the current plan depends on them any more — we are not dropping those tables yet (that is a real schema change on a real database and needs your sign-off first, per the "never overwrite Supabase without checking" rule), just not building on top of them. A new migration, `0005_stats_snapshots`, will add an append-only `stats_snapshots` table (recent form, head-to-head, shots/possession/corners, one row per capture, same pattern as `odds_snapshots`) once we're ingesting real Sportmonks data — not written yet, this plan comes first.
 
-Migration	Tables	Purpose
-0001_reference	sports, competitions, teams, players, bookmakers, provider_mappings	Canonical UUIDs plus (provider, provider_entity_id, entity_type) -> internal_id so no fuzzy name matching at analysis time
-0002_events_odds	events, event_participants, markets, market_selections, odds_snapshots, view current_odds	Fixtures and append-only price history
-0003_model	team_ratings, model_versions, model_runs, feature_snapshots, research_snapshots	Ratings and reproducible inputs for every run
-0004_ledger	predictions, prediction_legs, prediction_results, analysis_cache	Immutable prediction record, settlement and cached Claude output
-0005_users	profiles, subscriptions, usage_credits, credit_transactions, betslips, betslip_legs, saved_picks, alerts	Accounts, credits and betslip; built later
-
-The two enforcement rules, in SQL:
+The one enforcement rule this slice needs, in SQL (already in place from `0002_events_odds`):
 
 sql
 create table odds_snapshots (
@@ -165,31 +146,27 @@ begin raise exception 'table % is append-only', tg_table_name; end $$;
 
 create trigger odds_append_only before update or delete on odds_snapshots
   for each row execute function forbid_mutation();
-create trigger predictions_immutable before update or delete on predictions
-  for each row execute function forbid_mutation();
 
-Predictions. The predictions table holds every field the brief lists (timestamps, price, model and market probability, edge, confidence, model_version, data_snapshot_id, research_snapshot_id, reasoning). Results and closing price live in the separate prediction_results table, written at settlement, so the original row never changes. A check requires created_at < event.kickoff.
+The future `stats_snapshots` table will carry the same `forbid_mutation` trigger, so a head-to-head record or a form line can never be quietly edited after the fact — only appended to.
 
-Storage growth. Snapshots are stored only when a price changes, not on every poll, which keeps the table small on the free Supabase plan.
+Storage growth. Snapshots are stored only when a value changes, not on every poll, which keeps the tables small on the free Supabase plan.
 
-Security. Row-level security is on for every user table. Reference, odds and ledger tables are read-only to the anon role; all writes go through the service role in server code and workers. Seed data: one season of Premier League fixtures and results plus a handful of fake odds snapshots for tests.
+Security. Row-level security is on for every user table, once there are user tables. Reference and odds tables are read-only to the anon role; all writes go through the service role in server code and workers. Seed data: one season of Premier League fixtures and results, plus a handful of fake odds snapshots for tests.
 
 First vertical slice
 
-The slice is done when a user opens one Premier League fixture, clicks Analyse, and within about 10 seconds sees probability, market probability, edge, confidence and a Claude explanation, with an immutable prediction row saved. Build it in this order, each step shippable on its own. Per the budget-first approach, the model and backtest (steps 5 and 6) come before paid live odds.
+The slice is done when a user opens the fixtures list, picks one Premier League match, and sees recent form, head-to-head (with its sample size), shots/possession/corners, the price comparison (best UK price, Pinnacle's fair price, price movement) and a short Claude summary with risks, all in one screen. Build it in this order, each step shippable on its own. Per the budget-first approach, steps 1 to 3 (sample data, screens, review) come before any provider is paid for.
 
-Scaffold and data layer. Next.js app, Supabase client, migrations 0001 to 0004, seed teams, bookmakers and provider_mappings for the 20 Premier League clubs. (Done in the first Claude Code session, along with the value maths.)
-Odds provider. OddsApiProvider implements getEvents and getOdds; every response is parsed with Zod and rejected if malformed. An event whose teams have no mapping goes to a quarantine table and is logged, never fuzzy-matched.
-Ingestion cron. Events are refreshed from the free endpoint every 6 hours. Odds for h2h in region uk are polled every 30 minutes, tightening to every 10 minutes in the last 3 hours before kickoff. A new snapshot row is written only if a price changed.
-Value maths (lib/value). Implied probability is 1 / price. Bookmaker margin is removed by normalising the three outcomes so they sum to 1; a better method (power or Shin) can replace it later behind the same function. Edge is model probability minus margin-free market probability. Minimum price is 1 / (model probability minus a buffer), with the buffer defaulting to 2 percentage points and tunable.
-Football model v1 (football_1x2_v1). Elo ratings from past results (home advantage and K-factor as parameters) give an expected goal difference; a Poisson goals model turns that into home, draw and away probabilities. Ratings update nightly from new results.
-Backtest. Validate with a walk-forward backtest on historical seasons (never using information from after each match) and report log loss and calibration against the bookmakers' closing prices before trusting any output. This is the go or no-go point for paying for live odds.
-Confidence v1. A weighted 0-100 score from data completeness, price freshness, bookmaker agreement, edge size, and games played by each team, mapped to LOW, MEDIUM or HIGH. HIGH is disabled until enough settled predictions exist to check calibration; until then the label caps at MEDIUM and the UI says so.
-Research packet and Claude. Build the compact packet from the brief (event, market, model output, form, market movement, data-quality state). Claude returns the JSON schema from the brief; we validate it with Zod, retry once on failure, and on a second failure return the numbers without narrative and charge no credit.
-Ledger and cache. Insert the prediction before kickoff, store the analysis in analysis_cache under its hash, return the response shape in the brief's section 69.
-Settlement. A nightly job reads final scores, writes prediction_results with win, loss or void and the closing price from the last snapshot before kickoff.
+Scaffold and data layer. Next.js app, Supabase client, migrations 0001 to 0002, seed teams, bookmakers and provider_mappings for the 20 Premier League clubs, and `lib/price` with tests. (Done in earlier Claude Code sessions.)
+Provider interfaces and sample data. `OddsProvider` and `FootballStatsProvider` interfaces, each with a sample implementation returning clearly labelled fake data — realistic enough to judge the screens, obviously fake so nobody mistakes it for live data.
+Fixtures list and match page. Built against the sample providers: fixtures list with best UK price and Pinnacle fair price per outcome; match page with form, head-to-head, shots/possession/corners (sample sizes shown throughout) and the price comparison. A labelled sample of what Claude's summary will look like, not yet a real Claude call.
+Go or no-go on paying for stats and prices, based on how the screens read. Your decision.
+Real providers. `OddsApiProvider` and `SportmonksStatsProvider` implement the same interfaces; every response is parsed with Zod and rejected if malformed. An event whose teams have no mapping goes to a quarantine table and is logged, never fuzzy-matched.
+Ingestion crons. Events refreshed every 6 hours. Prices for h2h in region uk (plus Pinnacle in region eu) polled every 30 minutes, tightening to every 10 minutes in the last 3 hours before kickoff. Stats refreshed after each round of fixtures. A new snapshot row is written only if a value changed.
+Claude summary. Build the compact research packet (event, form, head-to-head, shots/possession/corners, price comparison). Claude returns the JSON schema from the brief's plain-English-summary section; we validate it with Zod, retry once on failure, and on a second failure show the numbers with no written summary.
+Caching. Store each summary in `analysis_cache` under a hash of fixture, stats snapshot, price snapshot and prompt version, so repeat views don't repeat Claude calls.
 
-Injuries and lineups are intentionally not in this slice. With no lineup data the data-quality state is LIMITED, and the UI shows that plainly.
+Injuries and lineups are intentionally not in this slice; add a source later only once we've checked it's reliable.
 
 Environment, tests and screens
 
@@ -198,10 +175,10 @@ Environment variables. All secrets are server-side only; only the two public Sup
 Variable	Scope	Purpose
 NEXT_PUBLIC_SUPABASE_URL	Public	Supabase project URL
 NEXT_PUBLIC_SUPABASE_ANON_KEY	Public	Anon key, protected by RLS
-SUPABASE_SERVICE_ROLE_KEY	Server	Workers and ledger writes
+SUPABASE_SERVICE_ROLE_KEY	Server	Workers and cache writes
 ODDS_API_KEY	Server	The Odds API
-STATS_API_KEY	Server	Results and fixtures provider, once chosen
-ANTHROPIC_API_KEY	Server	Claude analysis
+SPORTMONKS_API_KEY	Server	Sportmonks, once we sign up
+ANTHROPIC_API_KEY	Server	Claude match summaries
 CLAUDE_MODEL	Server	Model id, so it can change without a deploy
 CRON_SECRET	Server	Authenticates scheduled calls to worker routes
 STRIPE_SECRET_KEY, STRIPE_WEBHOOK_SECRET	Server	Only when paid tiers are added
@@ -210,43 +187,36 @@ SENTRY_DSN, NEXT_PUBLIC_POSTHOG_KEY	Mixed	Error tracking and analytics, only onc
 First automated tests (Vitest). Calculations come first because a silent error there corrupts everything downstream.
 
 Area	Cases
-Value maths	Implied probability; margin removal sums to 1; edge sign; minimum price; 1.08 at 90% is low value while 2.30 at 52% is positive (the brief's example)
+Price maths	Implied probability; margin removal sums to 1; Pinnacle's fair price from margin-removed probability; price-movement direction and size
 Provider mapping	Known alias resolves; unmapped team quarantines; duplicate event from two polls is one event
-Odds ingestion	Unchanged price writes no row; changed price appends; malformed payload rejected and logged
-Model	Probabilities sum to 1; stronger home side has higher home win probability; no use of results after the prediction timestamp
-Confidence	Stale odds lowers score; HIGH is blocked while calibration is unverified
-AI output	Valid JSON passes; missing field, out-of-range probability and prose-wrapped JSON fail; Claude cannot change model probability
-Ledger	UPDATE and DELETE on predictions and odds_snapshots raise; insert after kickoff is rejected
-Security	RLS blocks reading another user's history; worker routes reject a missing CRON_SECRET
+Odds and stats ingestion	Unchanged value writes no row; changed value appends; malformed payload rejected and logged
+Sample size	Every displayed stat carries the count it's based on; a stat with too small a sample (e.g. 0 or 1 head-to-head meetings) is flagged as insufficient rather than shown plainly
+AI output	Valid JSON passes; missing field or prose-wrapped JSON fails; Claude's reply cannot change a stat or a price, only narrate it
+Ledger	UPDATE and DELETE on `odds_snapshots` (and later `stats_snapshots`) raise
+Security	RLS blocks reading another user's data; worker routes reject a missing CRON_SECRET
 
-First UI screens. Visual direction is sportsbook meets TradingView: dense, dark-friendly, traffic-light confidence, no walls of AI text.
+First UI screens. Visual direction is sportsbook meets TradingView: dense, dark-friendly, no walls of AI text. Built first on sample data (this session), then wired to real providers once we sign up.
 
-Fixtures list for the Premier League with best 1X2 prices and a timestamp on every price.
-Event page with the three outcomes, bookmaker comparison, price movement and an Analyse button.
-Analysis card in the brief's hierarchy: selection, best price, probability, market probability, edge, confidence, minimum price, why, what could go wrong, data-quality state.
-Sign-in through Supabase Auth with an 18+ confirmation and responsible gambling footer.
+Fixtures list for the Premier League with best UK price and Pinnacle's fair price per outcome, and a timestamp on every price.
+Match page: recent form, head-to-head (with sample size), shots/possession/corners (with sample size), the price comparison and how the price has moved, and a short Claude summary with what could go wrong.
+Sign-in through Supabase Auth with an 18+ confirmation and responsible gambling footer (later, once accounts are needed).
 
-Betslip, accumulator, picks and pricing pages come in later phases.
+Betslip, picks and pricing pages come in later phases.
 
-Cost per analysis and monthly budget
+Cost per match summary and monthly budget
 
-A single analysis should cost roughly 1 to 2 US cents in Claude usage, and fixed provider costs land near $30 to $45 a month once live, inside the brief's £50 to £100 target. Token counts below are my estimates until we measure real packets; prices are from the Claude pricing page, read 23 September 2026.
+A single match summary should cost roughly 1 to 2 US cents in Claude usage, and fixed provider costs land near €55 to €60 a month (~£50) once live, inside the brief's £50 to £100 target. Token counts below are estimates until we measure real packets; prices are from the Claude pricing page, read 23 September 2026.
 
 Item	Assumption	Cost
-Single analysis, Sonnet 5	About 2,500 input and 700 output tokens at $2 and $10 per million	About $0.012
+Single match summary, Sonnet 5	About 2,500 input and 700 output tokens at $2 and $10 per million	About $0.012
 Same with cached system prompt	Cache reads bill at 10% of input rate	About $0.010
-4-leg accumulator analysis	About 8,000 input and 1,500 output tokens	About $0.031
-Cache hit on a shared analysis	No Claude call	$0
+Cache hit on a shared summary	No Claude call	$0
 
-Batch processing halves these rates and suits the daily Pick of the Day scan, which is not interactive.
-
-Odds credits. A h2h call for region uk costs 1 credit and returns every upcoming fixture. Polling every 30 minutes plus 10-minute polls in pre-kickoff windows is about 70 calls a day, so roughly 2,100 credits a month, plus about 250 for scores. That exceeds the free 500 credits and fits the $30 plan (20,000 credits) with room to add spreads and totals across two regions (about 13,000 credits a month).
-
-Per-subscriber view. A Pro user spending all 100 credits on single analyses costs about $1.20 in Claude usage; an Elite user spending all 500 costs about $6 against £49.99 of revenue. Both sit below the brief's £5 variable cost target for an average subscriber, and shared caching should push real cost lower.
+Batch processing halves these rates, useful for any future daily digest that isn't interactive.
 
 Monthly fixed cost once live	Estimate
 The Odds API, 20K plan	$30 (about £23)
-Football stats source	Free to EUR 12
+Sportmonks Starter	€29 (about £25)
 Vercel Pro (needed once charging)	From $20
 Supabase Pro (once live)	From $25
 Sentry and PostHog	Not used at first
@@ -258,12 +228,11 @@ Launch blockers
 None of these stop us building the slice, but each must be closed before the product is public. I am not a lawyer; the legal rows need proper advice, as the brief already says.
 
 Blocker	Why it matters	Action
-Odds API "primary product" clause	Display is allowed only if the data is not the primary product sold	Ask the provider in writing whether our analysis subscription qualifies, especially bookmaker comparison
+Odds API "primary product" clause	Display is allowed only if the data is not the primary product sold	Ask the provider in writing whether our price-comparison screen qualifies
 Bookmaker names, logos, affiliate links	The terms I read are silent on these	Get written confirmation; log in DATA_PROVIDERS.md
-Stats provider terms	Commercial use and storage not confirmed for football-data.org or football-data.co.uk	Read full terms and pick one before adding form data
-No injury or lineup source	Analyses are capped at data quality LIMITED without it	Evaluate a provider after slice 1
-Calibration unproven	HIGH confidence would be unearned	Keep HIGH disabled until enough settled predictions and a calibration check exist
-UK gambling and advertising rules	Pick of the Day may be treated as tipping; affiliate promotion is regulated	Legal advice on Gambling Commission, ASA and CAP rules, and required responsible gambling wording
+Sportmonks not signed up	Stats screens run on sample data until we pay	Sign up once the screens are approved (see build order)
+No injury or lineup source	Match pages are missing this context for now	Evaluate a provider after slice 1
+UK gambling and advertising rules	Price comparison could be read as tipping; affiliate promotion is regulated	Legal advice on Gambling Commission, ASA and CAP rules, and required responsible gambling wording
 Privacy and age gating	18+ product handling personal data	GDPR review, account deletion and data export, age confirmation at sign-up
 Vercel plan	Hobby is non-commercial only and limits cron to once a day	Move to Pro when charging, or use Supabase pg_cron in the meantime
 
@@ -271,16 +240,16 @@ Marketing copy must avoid guaranteed-win, risk-free and easy-money language thro
 
 Build order and next steps
 Order	Work	Status / needs from you
-1	Next.js scaffold, Supabase migrations 0001 to 0004, seed data, lib/value with tests	Done in the first Claude Code session
-2	Football model v1 and backtest on free historical data	Next; no paid services
-3	Go or no-go on paying for live odds	Your decision, based on the backtest
-4	OddsApiProvider, ingestion routes, snapshots	The Odds API key
-5	Confidence v1, research packet, Claude call, ledger	Anthropic API key
-6	Fixtures, event and analysis screens	Design feedback
+1	Next.js scaffold, Supabase migrations 0001 to 0002, seed data, lib/price with tests	Done in earlier Claude Code sessions
+2	Fixtures list and match page on sample data, stats and odds behind interfaces	Done in this session
+3	Go or no-go on paying for Sportmonks and The Odds API	Your decision, based on the screens
+4	OddsApiProvider and SportmonksStatsProvider, ingestion routes, snapshots	Both API keys
+5	Claude summary and caching	Anthropic API key
+6	Real screens wired to real data, sign-in	Design feedback
 
 Open questions (defaults assumed if not answered):
 
  Vercel plan: Hobby or Pro? (Assumed Hobby.)
  Existing or new Supabase project for development? (Assumed new.)
- Football stats source: free tier first, or a paid one? (Assumed free.)
+ Sign up for Sportmonks Starter (~€29/month) now, or keep building on sample data a while longer? (Assumed: sample data for now — see the go/no-go step above.)
  UK only, or US bookmakers too? (Assumed UK only.)

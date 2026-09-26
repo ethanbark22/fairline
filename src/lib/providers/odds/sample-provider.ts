@@ -9,7 +9,13 @@
  */
 
 import { SAMPLE_TEAMS } from "@/lib/sample-data/teams";
-import type { FixtureSummary, OddsProvider, OutcomePriceComparison, PriceComparison } from "./types";
+import type {
+  FixtureSummary,
+  MarketPriceComparison,
+  OddsProvider,
+  OutcomePriceComparison,
+  PriceComparison,
+} from "./types";
 
 const COMPETITION = "Premier League";
 
@@ -44,98 +50,141 @@ const SAMPLE_FIXTURES: FixtureSummary[] = [
   },
 ];
 
-// outcome -> { bestUk bookmaker/price, raw Pinnacle price, opening/current best-UK price }
-const SAMPLE_PRICES: Record<string, OutcomePriceComparison[]> = {
+interface OutcomeInput {
+  outcome: string;
+  bookmaker: string;
+  price: number;
+  pinnaclePrice: number;
+  opening: number;
+  current: number;
+}
+
+/** Builds one outcome's full price-comparison record from short-hand numbers, so the sample data below stays readable. */
+function outcome(capturedAt: string, openingCapturedAt: string, input: OutcomeInput): OutcomePriceComparison {
+  return {
+    outcome: input.outcome,
+    bestUk: { outcome: input.outcome, bookmaker: input.bookmaker, price: input.price, capturedAt },
+    pinnaclePrice: input.pinnaclePrice,
+    opening: { price: input.opening, capturedAt: openingCapturedAt },
+    current: { price: input.current, capturedAt },
+  };
+}
+
+const SAMPLE_PRICES: Record<string, MarketPriceComparison[]> = {
   "fx-1": [
     {
-      outcome: "Home",
-      bestUk: { outcome: "Home", bookmaker: "Bet365", price: 2.05, capturedAt: "2026-10-03T09:00:00Z" },
-      pinnaclePrice: 2.02,
-      opening: { price: 1.95, capturedAt: "2026-09-27T09:00:00Z" },
-      current: { price: 2.05, capturedAt: "2026-10-03T09:00:00Z" },
+      market: "match_winner",
+      marketLabel: "Match Winner",
+      outcomes: [
+        outcome("2026-10-03T09:00:00Z", "2026-09-27T09:00:00Z", { outcome: "Home", bookmaker: "Bet365", price: 2.05, pinnaclePrice: 2.02, opening: 1.95, current: 2.05 }),
+        outcome("2026-10-03T09:00:00Z", "2026-09-27T09:00:00Z", { outcome: "Draw", bookmaker: "William Hill", price: 3.7, pinnaclePrice: 3.65, opening: 3.8, current: 3.7 }),
+        outcome("2026-10-03T09:00:00Z", "2026-09-27T09:00:00Z", { outcome: "Away", bookmaker: "Betfair", price: 3.9, pinnaclePrice: 3.85, opening: 4.2, current: 3.9 }),
+      ],
     },
     {
-      outcome: "Draw",
-      bestUk: { outcome: "Draw", bookmaker: "William Hill", price: 3.7, capturedAt: "2026-10-03T09:00:00Z" },
-      pinnaclePrice: 3.65,
-      opening: { price: 3.8, capturedAt: "2026-09-27T09:00:00Z" },
-      current: { price: 3.7, capturedAt: "2026-10-03T09:00:00Z" },
+      market: "total_corners",
+      marketLabel: "Total Corners",
+      line: 9.5,
+      outcomes: [
+        outcome("2026-10-03T09:00:00Z", "2026-09-27T09:00:00Z", { outcome: "Over", bookmaker: "Bet365", price: 1.85, pinnaclePrice: 1.83, opening: 1.91, current: 1.85 }),
+        outcome("2026-10-03T09:00:00Z", "2026-09-27T09:00:00Z", { outcome: "Under", bookmaker: "Sky Bet", price: 1.95, pinnaclePrice: 1.93, opening: 1.88, current: 1.95 }),
+      ],
     },
     {
-      outcome: "Away",
-      bestUk: { outcome: "Away", bookmaker: "Betfair", price: 3.9, capturedAt: "2026-10-03T09:00:00Z" },
-      pinnaclePrice: 3.85,
-      opening: { price: 4.2, capturedAt: "2026-09-27T09:00:00Z" },
-      current: { price: 3.9, capturedAt: "2026-10-03T09:00:00Z" },
+      market: "total_cards",
+      marketLabel: "Total Cards",
+      line: 4.5,
+      outcomes: [
+        outcome("2026-10-03T09:00:00Z", "2026-09-27T09:00:00Z", { outcome: "Over", bookmaker: "William Hill", price: 2.1, pinnaclePrice: 2.05, opening: 1.98, current: 2.1 }),
+        outcome("2026-10-03T09:00:00Z", "2026-09-27T09:00:00Z", { outcome: "Under", bookmaker: "Betfair", price: 1.72, pinnaclePrice: 1.76, opening: 1.83, current: 1.72 }),
+      ],
     },
   ],
   "fx-2": [
     {
-      outcome: "Home",
-      bestUk: { outcome: "Home", bookmaker: "Paddy Power", price: 2.3, capturedAt: "2026-10-03T09:00:00Z" },
-      pinnaclePrice: 2.28,
-      opening: { price: 2.15, capturedAt: "2026-09-27T09:00:00Z" },
-      current: { price: 2.3, capturedAt: "2026-10-03T09:00:00Z" },
+      market: "match_winner",
+      marketLabel: "Match Winner",
+      outcomes: [
+        outcome("2026-10-03T09:00:00Z", "2026-09-27T09:00:00Z", { outcome: "Home", bookmaker: "Paddy Power", price: 2.3, pinnaclePrice: 2.28, opening: 2.15, current: 2.3 }),
+        outcome("2026-10-03T09:00:00Z", "2026-09-27T09:00:00Z", { outcome: "Draw", bookmaker: "Bet365", price: 3.5, pinnaclePrice: 3.6, opening: 3.5, current: 3.5 }),
+        outcome("2026-10-03T09:00:00Z", "2026-09-27T09:00:00Z", { outcome: "Away", bookmaker: "Sky Bet", price: 3.2, pinnaclePrice: 3.15, opening: 3.4, current: 3.2 }),
+      ],
     },
     {
-      outcome: "Draw",
-      bestUk: { outcome: "Draw", bookmaker: "Bet365", price: 3.5, capturedAt: "2026-10-03T09:00:00Z" },
-      pinnaclePrice: 3.6,
-      opening: { price: 3.5, capturedAt: "2026-09-27T09:00:00Z" },
-      current: { price: 3.5, capturedAt: "2026-10-03T09:00:00Z" },
+      market: "total_corners",
+      marketLabel: "Total Corners",
+      line: 10.5,
+      outcomes: [
+        outcome("2026-10-03T09:00:00Z", "2026-09-27T09:00:00Z", { outcome: "Over", bookmaker: "Paddy Power", price: 1.9, pinnaclePrice: 1.87, opening: 1.95, current: 1.9 }),
+        outcome("2026-10-03T09:00:00Z", "2026-09-27T09:00:00Z", { outcome: "Under", bookmaker: "Coral", price: 1.9, pinnaclePrice: 1.88, opening: 1.85, current: 1.9 }),
+      ],
     },
     {
-      outcome: "Away",
-      bestUk: { outcome: "Away", bookmaker: "Sky Bet", price: 3.2, capturedAt: "2026-10-03T09:00:00Z" },
-      pinnaclePrice: 3.15,
-      opening: { price: 3.4, capturedAt: "2026-09-27T09:00:00Z" },
-      current: { price: 3.2, capturedAt: "2026-10-03T09:00:00Z" },
+      market: "total_cards",
+      marketLabel: "Total Cards",
+      line: 3.5,
+      outcomes: [
+        outcome("2026-10-03T09:00:00Z", "2026-09-27T09:00:00Z", { outcome: "Over", bookmaker: "Bet365", price: 1.8, pinnaclePrice: 1.78, opening: 1.75, current: 1.8 }),
+        outcome("2026-10-03T09:00:00Z", "2026-09-27T09:00:00Z", { outcome: "Under", bookmaker: "William Hill", price: 1.95, pinnaclePrice: 1.98, opening: 2.0, current: 1.95 }),
+      ],
     },
   ],
   "fx-3": [
     {
-      outcome: "Home",
-      bestUk: { outcome: "Home", bookmaker: "Ladbrokes", price: 2.75, capturedAt: "2026-10-04T09:00:00Z" },
-      pinnaclePrice: 2.7,
-      opening: { price: 2.6, capturedAt: "2026-09-28T09:00:00Z" },
-      current: { price: 2.75, capturedAt: "2026-10-04T09:00:00Z" },
+      market: "match_winner",
+      marketLabel: "Match Winner",
+      outcomes: [
+        outcome("2026-10-04T09:00:00Z", "2026-09-28T09:00:00Z", { outcome: "Home", bookmaker: "Ladbrokes", price: 2.75, pinnaclePrice: 2.7, opening: 2.6, current: 2.75 }),
+        outcome("2026-10-04T09:00:00Z", "2026-09-28T09:00:00Z", { outcome: "Draw", bookmaker: "Coral", price: 3.4, pinnaclePrice: 3.45, opening: 3.3, current: 3.4 }),
+        outcome("2026-10-04T09:00:00Z", "2026-09-28T09:00:00Z", { outcome: "Away", bookmaker: "Bet365", price: 2.7, pinnaclePrice: 2.75, opening: 2.9, current: 2.7 }),
+      ],
     },
     {
-      outcome: "Draw",
-      bestUk: { outcome: "Draw", bookmaker: "Coral", price: 3.4, capturedAt: "2026-10-04T09:00:00Z" },
-      pinnaclePrice: 3.45,
-      opening: { price: 3.3, capturedAt: "2026-09-28T09:00:00Z" },
-      current: { price: 3.4, capturedAt: "2026-10-04T09:00:00Z" },
+      market: "total_corners",
+      marketLabel: "Total Corners",
+      line: 9.5,
+      outcomes: [
+        outcome("2026-10-04T09:00:00Z", "2026-09-28T09:00:00Z", { outcome: "Over", bookmaker: "Ladbrokes", price: 1.95, pinnaclePrice: 1.92, opening: 1.9, current: 1.95 }),
+        outcome("2026-10-04T09:00:00Z", "2026-09-28T09:00:00Z", { outcome: "Under", bookmaker: "Bet365", price: 1.85, pinnaclePrice: 1.84, opening: 1.9, current: 1.85 }),
+      ],
     },
     {
-      outcome: "Away",
-      bestUk: { outcome: "Away", bookmaker: "Bet365", price: 2.7, capturedAt: "2026-10-04T09:00:00Z" },
-      pinnaclePrice: 2.75,
-      opening: { price: 2.9, capturedAt: "2026-09-28T09:00:00Z" },
-      current: { price: 2.7, capturedAt: "2026-10-04T09:00:00Z" },
+      market: "total_cards",
+      marketLabel: "Total Cards",
+      line: 5.5,
+      outcomes: [
+        outcome("2026-10-04T09:00:00Z", "2026-09-28T09:00:00Z", { outcome: "Over", bookmaker: "Coral", price: 1.75, pinnaclePrice: 1.73, opening: 1.8, current: 1.75 }),
+        outcome("2026-10-04T09:00:00Z", "2026-09-28T09:00:00Z", { outcome: "Under", bookmaker: "Ladbrokes", price: 2.0, pinnaclePrice: 2.03, opening: 1.95, current: 2.0 }),
+      ],
     },
   ],
   "fx-4": [
     {
-      outcome: "Home",
-      bestUk: { outcome: "Home", bookmaker: "William Hill", price: 1.95, capturedAt: "2026-10-04T09:00:00Z" },
-      pinnaclePrice: 1.92,
-      opening: { price: 2.05, capturedAt: "2026-09-28T09:00:00Z" },
-      current: { price: 1.95, capturedAt: "2026-10-04T09:00:00Z" },
+      market: "match_winner",
+      marketLabel: "Match Winner",
+      outcomes: [
+        outcome("2026-10-04T09:00:00Z", "2026-09-28T09:00:00Z", { outcome: "Home", bookmaker: "William Hill", price: 1.95, pinnaclePrice: 1.92, opening: 2.05, current: 1.95 }),
+        outcome("2026-10-04T09:00:00Z", "2026-09-28T09:00:00Z", { outcome: "Draw", bookmaker: "Bet365", price: 3.8, pinnaclePrice: 3.75, opening: 3.7, current: 3.8 }),
+        outcome("2026-10-04T09:00:00Z", "2026-09-28T09:00:00Z", { outcome: "Away", bookmaker: "Sky Bet", price: 4.3, pinnaclePrice: 4.4, opening: 4.0, current: 4.3 }),
+      ],
     },
     {
-      outcome: "Draw",
-      bestUk: { outcome: "Draw", bookmaker: "Bet365", price: 3.8, capturedAt: "2026-10-04T09:00:00Z" },
-      pinnaclePrice: 3.75,
-      opening: { price: 3.7, capturedAt: "2026-09-28T09:00:00Z" },
-      current: { price: 3.8, capturedAt: "2026-10-04T09:00:00Z" },
+      market: "total_corners",
+      marketLabel: "Total Corners",
+      line: 9.5,
+      outcomes: [
+        outcome("2026-10-04T09:00:00Z", "2026-09-28T09:00:00Z", { outcome: "Over", bookmaker: "William Hill", price: 1.8, pinnaclePrice: 1.79, opening: 1.85, current: 1.8 }),
+        outcome("2026-10-04T09:00:00Z", "2026-09-28T09:00:00Z", { outcome: "Under", bookmaker: "Sky Bet", price: 2.0, pinnaclePrice: 1.98, opening: 1.93, current: 2.0 }),
+      ],
     },
     {
-      outcome: "Away",
-      bestUk: { outcome: "Away", bookmaker: "Sky Bet", price: 4.3, capturedAt: "2026-10-04T09:00:00Z" },
-      pinnaclePrice: 4.4,
-      opening: { price: 4.0, capturedAt: "2026-09-28T09:00:00Z" },
-      current: { price: 4.3, capturedAt: "2026-10-04T09:00:00Z" },
+      market: "total_cards",
+      marketLabel: "Total Cards",
+      line: 4.5,
+      outcomes: [
+        outcome("2026-10-04T09:00:00Z", "2026-09-28T09:00:00Z", { outcome: "Over", bookmaker: "Bet365", price: 1.9, pinnaclePrice: 1.88, opening: 1.84, current: 1.9 }),
+        outcome("2026-10-04T09:00:00Z", "2026-09-28T09:00:00Z", { outcome: "Under", bookmaker: "William Hill", price: 1.85, pinnaclePrice: 1.87, opening: 1.92, current: 1.85 }),
+      ],
     },
   ],
 };
@@ -146,11 +195,11 @@ export class SampleOddsProvider implements OddsProvider {
   }
 
   async getPriceComparison(fixtureId: string): Promise<PriceComparison> {
-    const outcomes = SAMPLE_PRICES[fixtureId];
-    if (!outcomes) {
+    const markets = SAMPLE_PRICES[fixtureId];
+    if (!markets) {
       throw new RangeError(`No sample price data for fixture "${fixtureId}"`);
     }
-    return { fixtureId, outcomes };
+    return { fixtureId, markets };
   }
 }
 

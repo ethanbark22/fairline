@@ -61,6 +61,7 @@ export interface MatchStatAverages {
   shotsOnTargetPerGame: number;
   possessionPct: number;
   cornersPerGame: number;
+  cardsPerGame: number;
   sampleSize: number;
   sampleDescription: string;
 }

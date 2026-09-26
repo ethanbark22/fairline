@@ -9,6 +9,8 @@ function selection(overrides: Partial<BetslipSelection>): BetslipSelection {
     homeTeam: "Arsenal",
     awayTeam: "Chelsea",
     kickoff: "2026-10-04T14:00:00Z",
+    market: "match_winner",
+    marketLabel: "Match Winner",
     outcome: "Home",
     price: 2.0,
     bookmaker: "Bet365",
@@ -55,10 +57,10 @@ describe("checkCorrelation", () => {
     expect(result.sharedFixtures).toEqual([]);
   });
 
-  it("flags the same fixture appearing twice", () => {
+  it("flags two different markets on the same fixture", () => {
     const result = checkCorrelation([
-      selection({ fixtureId: "fx-1", outcome: "Home" }),
-      selection({ fixtureId: "fx-1", outcome: "Draw" }),
+      selection({ fixtureId: "fx-1", market: "match_winner", marketLabel: "Match Winner", outcome: "Home" }),
+      selection({ fixtureId: "fx-1", market: "total_corners", marketLabel: "Total Corners O/U 9.5", outcome: "Over" }),
     ]);
     expect(result.correlated).toBe(true);
     expect(result.sharedFixtures).toEqual(["fx-1"]);

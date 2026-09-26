@@ -1,26 +1,71 @@
 @import "tailwindcss";
 
+/*
+ * Fairline colour system. Dark is the primary, designed-for theme (a dense,
+ * sportsbook-meets-trading-terminal feel); light is a straightforward flip
+ * of the same tokens so the app still works with the OS set to light mode.
+ * Change a value here and every component using the matching Tailwind
+ * utility (bg-surface, text-muted, border-line, bg-brand, ...) updates.
+ */
 :root {
-  --background: #ffffff;
-  --foreground: #171717;
+  --background: #f5f6f8;
+  --foreground: #12151b;
+  --surface: #ffffff;
+  --surface-2: #eceef2;
+  --line: #d8dbe2;
+  --muted: #5b6270;
+  --brand: #0f9d6b;
+  --brand-foreground: #ffffff;
+  --accent: #d98a2b;
+  --danger: #d9425a;
+  --warning: #b8791a;
+  --warning-bg: #fbf0dd;
 }
 
 @theme inline {
   --color-background: var(--background);
   --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
+  --color-surface: var(--surface);
+  --color-surface-2: var(--surface-2);
+  --color-line: var(--line);
+  --color-muted: var(--muted);
+  --color-brand: var(--brand);
+  --color-brand-foreground: var(--brand-foreground);
+  --color-accent: var(--accent);
+  --color-danger: var(--danger);
+  --color-warning: var(--warning);
+  --color-warning-bg: var(--warning-bg);
+  --font-sans: var(--font-body);
+  --font-display: var(--font-display);
 }
 
 @media (prefers-color-scheme: dark) {
   :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
+    --background: #0a0c10;
+    --foreground: #eef1f6;
+    --surface: #12151c;
+    --surface-2: #1a1e27;
+    --line: #262c38;
+    --muted: #8890a0;
+    --brand: #1fce8f;
+    --brand-foreground: #06130d;
+    --accent: #eda94a;
+    --danger: #f2617a;
+    --warning: #f0b34e;
+    --warning-bg: rgba(240, 179, 78, 0.12);
   }
 }
 
 body {
   background: var(--background);
   color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+  font-family: var(--font-body), ui-sans-serif, system-ui, sans-serif;
+}
+
+h1,
+h2,
+h3,
+.font-display {
+  font-family: var(--font-display), var(--font-body), ui-sans-serif, system-ui, sans-serif;
+  letter-spacing: -0.01em;
 }

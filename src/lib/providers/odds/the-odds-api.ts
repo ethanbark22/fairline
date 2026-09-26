@@ -6,7 +6,7 @@
  * 1 credit per market per region, whatever the number of fixtures returned.
  */
 import { z } from "zod";
-import type { BookmakerPrices, EventOdds, OddsEvent, OddsProvider, ProviderUsage } from "./types";
+import type { BookmakerPrices, EventOdds, OddsEvent, ProviderUsage, TheOddsApiClient } from "./types";
 
 const BASE_URL = "https://api.the-odds-api.com/v4";
 
@@ -32,7 +32,7 @@ const oddsEventSchema = eventSchema.extend({
 
 type FetchLike = (url: string) => Promise<Response>;
 
-export class TheOddsApiProvider implements OddsProvider {
+export class TheOddsApiProvider implements TheOddsApiClient {
   constructor(
     private readonly apiKey: string,
     private readonly fetchFn: FetchLike = (url) => fetch(url),

@@ -86,7 +86,7 @@ function Summary({ legs }: { legs: LegSummary[] }) {
         ) : (
           <>
             All <strong>{legs.length}</strong> selections need to win for this bet to pay out — one loss
-            voids the whole slip.
+            and the whole bet loses, the same as any other accumulator.
           </>
         )}
       </p>

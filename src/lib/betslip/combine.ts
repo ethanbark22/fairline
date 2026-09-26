@@ -4,7 +4,12 @@
  * silently multiply leg probabilities together as if they were independent.
  */
 
-import type { BetslipSelection } from "./types";
+/** The only fields checkCorrelation needs — satisfied by BetslipSelection and by the server-side LegSummary alike. */
+export interface CorrelationInput {
+  fixtureId: string;
+  homeTeam: string;
+  awayTeam: string;
+}
 
 /**
  * The accumulator's combined decimal price: legs' prices multiplied
@@ -40,7 +45,7 @@ export interface CorrelationCheck {
  * but a combined "fair chance" from multiplying probabilities would not
  * be — the legs' outcomes can move together.
  */
-export function checkCorrelation(selections: readonly BetslipSelection[]): CorrelationCheck {
+export function checkCorrelation(selections: readonly CorrelationInput[]): CorrelationCheck {
   const teamCounts = new Map<string, number>();
   const fixtureCounts = new Map<string, number>();
 

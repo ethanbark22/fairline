@@ -1,18 +1,13 @@
 "use client";
 
 import { useState } from "react";
+import { usePathname, useRouter } from "next/navigation";
 import { useBetslip } from "./betslip-context";
-import { buildSlipAnalysis, type SlipAnalysis } from "@/lib/betslip/analysis";
 import { checkCorrelation, combinedPrice, type CorrelationCheck } from "@/lib/betslip/combine";
+import { encodeLegsParam } from "@/lib/betslip/leg-key";
 import type { BetslipSelection } from "@/lib/betslip/types";
 import type { MarketKey } from "@/lib/providers/odds/types";
 import { formatKickoff, formatPrice } from "@/lib/format";
-
-interface AnalysisState {
-  /** The selections this analysis was generated from, by reference — used only to tell whether the slip has changed since. */
-  selections: BetslipSelection[];
-  result: SlipAnalysis;
-}
 
 function legKey(s: BetslipSelection): string {
   return `${s.fixtureId}:${s.market}`;
@@ -21,21 +16,34 @@ function legKey(s: BetslipSelection): string {
 /**
  * The betslip: a fixed sidebar on desktop, a slide-up sheet from a bottom
  * bar on narrow screens. Multiple selections combine as an accumulator.
- * "Analyse Bet" never places a bet or moves money — see lib/betslip/analysis.ts.
+ * Kept deliberately simple — the list, the combined price, and the Analyse
+ * Bet button — so it stays readable with a large accumulator. Analyse Bet
+ * takes the user to the full-page /betslip/analysis screen instead of
+ * growing this sidebar; it never places a bet or moves money.
  */
 export function BetslipPanel() {
   const { selections, removeSelection, clear } = useBetslip();
-  const [analysisState, setAnalysisState] = useState<AnalysisState | null>(null);
+  const router = useRouter();
+  const pathname = usePathname();
+  const [analysing, setAnalysing] = useState(false);
   const [mobileOpen, setMobileOpen] = useState(false);
 
-  // Any change to the slip — adding, removing or swapping a leg — gives a
-  // new `selections` array from the betslip context, so a stored analysis
-  // for an older array is stale and simply stops matching here. No effect
-  // needed: this is a plain derived value.
-  const analysis = analysisState && analysisState.selections === selections ? analysisState.result : null;
+  // The full analysis page already shows the slip in more depth; showing
+  // this sidebar alongside it would just duplicate the same information.
+  if (pathname.startsWith("/betslip/analysis")) return null;
 
-  function handleAnalyse() {
-    setAnalysisState({ selections, result: buildSlipAnalysis(selections) });
+  async function handleAnalyse() {
+    setAnalysing(true);
+    // Brief, honest pause — there's no real analysis call yet, but the real
+    // version will take a moment (a Claude call per leg), so this previews
+    // that instead of jumping instantly.
+    await new Promise((resolve) => setTimeout(resolve, 500));
+    router.push(`/betslip/analysis?legs=${encodeURIComponent(encodeLegsParam(selections))}`);
+    // This component doesn't unmount on navigation (it's rendered once in
+    // the root layout) — it just returns null while on the analysis page,
+    // per the pathname check above. Reset here so the button is back to
+    // normal, not stuck showing "Preparing analysis…", if the user returns.
+    setAnalysing(false);
   }
 
   const correlation = checkCorrelation(selections);
@@ -44,9 +52,9 @@ export function BetslipPanel() {
   const body = (
     <BetslipBody
       selections={selections}
-      analysis={analysis}
       correlation={correlation}
       combined={price}
+      analysing={analysing}
       onRemove={removeSelection}
       onClear={clear}
       onAnalyse={handleAnalyse}
@@ -92,17 +100,17 @@ export function BetslipPanel() {
 
 function BetslipBody({
   selections,
-  analysis,
   correlation,
   combined,
+  analysing,
   onRemove,
   onClear,
   onAnalyse,
 }: {
   selections: BetslipSelection[];
-  analysis: SlipAnalysis | null;
   correlation: CorrelationCheck;
   combined: number | null;
+  analysing: boolean;
   onRemove: (fixtureId: string, market: MarketKey) => void;
   onClear: () => void;
   onAnalyse: () => void;
@@ -169,32 +177,17 @@ function BetslipBody({
           <button
             type="button"
             onClick={onAnalyse}
-            className="mt-3 w-full rounded-lg bg-brand py-2.5 text-sm font-semibold text-brand-foreground transition hover:brightness-110"
+            disabled={analysing}
+            className="mt-3 flex w-full items-center justify-center gap-2 rounded-lg bg-brand py-2.5 text-sm font-semibold text-brand-foreground transition hover:brightness-110 disabled:opacity-70"
           >
-            Analyse Bet
+            {analysing && (
+              <span className="h-3.5 w-3.5 animate-spin rounded-full border-2 border-brand-foreground/40 border-t-brand-foreground" />
+            )}
+            {analysing ? "Preparing analysis…" : "Analyse Bet"}
           </button>
           <p className="mt-1 text-center text-[11px] text-muted">
             Analysis only — this does not place a bet or move any money.
           </p>
-        </div>
-      )}
-
-      {analysis && (
-        <div className="mt-4 rounded-lg border border-line bg-surface-2 p-3 text-sm">
-          <p className="text-xs font-medium tracking-wide text-muted uppercase">
-            Sample analysis — placeholder text, not a real Claude call yet
-          </p>
-          {analysis.correlationWarning && (
-            <p className="mt-2 rounded-md border border-warning/40 bg-warning-bg p-2 text-xs text-warning">
-              {analysis.correlationWarning}
-            </p>
-          )}
-          <ul className="mt-2 flex flex-col gap-2 text-foreground/90">
-            {analysis.legs.map((leg, i) => (
-              <li key={i}>{leg.text}</li>
-            ))}
-          </ul>
-          <p className="mt-2 font-medium">{analysis.overall}</p>
         </div>
       )}
 

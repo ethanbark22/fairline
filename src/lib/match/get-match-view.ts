@@ -162,7 +162,63 @@ export async function getMatchView(fixtureId: string): Promise<MatchView | null>
   };
 }
 
-function formRecord(form: TeamForm): { wins: number; draws: number; losses: number } {
+export interface LegKey {
+  fixtureId: string;
+  market: MarketKey;
+  outcome: string;
+}
+
+export interface LegSummary {
+  fixtureId: string;
+  competition: string;
+  kickoff: string;
+  market: MarketKey;
+  marketLabel: string;
+  line?: number;
+  outcome: MatchOutcomeView;
+  home: TeamMatchView;
+  away: TeamMatchView;
+  headToHead: HeadToHead;
+}
+
+/**
+ * Looks up the current data for a set of (fixture, market, outcome) keys —
+ * what `/betslip/analysis` renders. Keys referring to a fixture, market or
+ * outcome that no longer exists are silently dropped rather than throwing,
+ * since a slip can be built and analysed a while apart. Fixtures repeated
+ * across several legs (e.g. Match Winner and Total Corners on the same
+ * game) only get their form/head-to-head fetched once.
+ */
+export async function getLegSummaries(keys: readonly LegKey[]): Promise<LegSummary[]> {
+  const uniqueFixtureIds = [...new Set(keys.map((k) => k.fixtureId))];
+  const matches = new Map(
+    (await Promise.all(uniqueFixtureIds.map(async (id) => [id, await getMatchView(id)] as const))),
+  );
+
+  const summaries: LegSummary[] = [];
+  for (const key of keys) {
+    const match = matches.get(key.fixtureId);
+    if (!match) continue;
+    const market = match.markets.find((m) => m.market === key.market);
+    const outcome = market?.outcomes.find((o) => o.outcome === key.outcome);
+    if (!market || !outcome) continue;
+    summaries.push({
+      fixtureId: match.fixtureId,
+      competition: match.competition,
+      kickoff: match.kickoff,
+      market: market.market,
+      marketLabel: market.line !== undefined ? `${market.marketLabel} O/U ${market.line}` : market.marketLabel,
+      line: market.line,
+      outcome,
+      home: match.home,
+      away: match.away,
+      headToHead: match.headToHead,
+    });
+  }
+  return summaries;
+}
+
+export function formRecord(form: TeamForm): { wins: number; draws: number; losses: number } {
   return form.matches.reduce(
     (acc, m) => {
       if (m.result === "W") acc.wins += 1;

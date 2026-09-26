@@ -29,19 +29,6 @@ export default async function MatchPage({ params }: { params: Promise<{ id: stri
         <SampleDataBanner />
       </div>
 
-      <Section title="Price comparison">
-        <MarketTabs
-          markets={match.markets}
-          fixture={{
-            fixtureId: match.fixtureId,
-            competition: match.competition,
-            homeTeam: match.home.teamName,
-            awayTeam: match.away.teamName,
-            kickoff: match.kickoff,
-          }}
-        />
-      </Section>
-
       <Section title="Recent form">
         <div className="grid grid-cols-1 gap-6 sm:grid-cols-2">
           <TeamFormCard team={match.home} />
@@ -101,6 +88,19 @@ export default async function MatchPage({ params }: { params: Promise<{ id: stri
         <p className="mt-2 text-xs text-muted">
           Sample size: {match.home.stats.sampleSize} matches per team.
         </p>
+      </Section>
+
+      <Section title="Prices">
+        <MarketTabs
+          markets={match.markets}
+          fixture={{
+            fixtureId: match.fixtureId,
+            competition: match.competition,
+            homeTeam: match.home.teamName,
+            awayTeam: match.away.teamName,
+            kickoff: match.kickoff,
+          }}
+        />
       </Section>
 
       <Section title="Summary">

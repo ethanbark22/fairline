@@ -254,7 +254,7 @@ function buildSampleSummary(
     risks: [
       `A sample of ${homeForm.sampleSize} matches is small — a couple of results either way would change these numbers a lot.`,
       "Recent form doesn't account for injuries, suspensions or fixture congestion, which aren't in this data yet.",
-      "The price comparison is a snapshot, not a prediction — bookmaker prices can and do move again before kickoff.",
+      "The prices shown are a snapshot, not a prediction — bookmaker prices can and do move again before kickoff.",
     ],
   };
 }

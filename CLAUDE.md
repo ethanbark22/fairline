@@ -4,9 +4,9 @@ Instructions for Claude Code. Read this file and everything in `docs/` before st
 
 ## What this project is
 
-A football research and price-comparison website. Users pick a Premier League match and see recent form, the head-to-head record, shots, possession and corners, next to the bookmaker prices: the best UK price, Pinnacle's price with its margin removed (a fair-price reference), and how the price has moved. Claude writes a short plain-English summary of the match and points out what could go wrong, using only the numbers we supply — it does not predict a result, calculate a probability, or score an edge. It does NOT take bets, hold money or promise winners.
+A betslip-analysis tool for regular football fans who enjoy a Premier League accumulator — not a value-finding tool for professional bettors chasing small edges against the market. Users build a betslip (Match Winner, Total Corners, Total Cards), then click Analyse Bet to get a plain-English read on it: recent form and head-to-head for each leg written in plain language (e.g. "won 4 of the last 6"), the combined price, how many things need to go right, which leg looks weakest and why, and a warning when legs in the slip aren't independent. Claude writes the words from numbers we supply — it does not predict a result, calculate a probability, or score an edge. It does NOT take bets, hold money or promise winners.
 
-The full brief is `docs/MASTER_BRIEF.md`. The build plan is `docs/PLAN.md`. If they disagree, the plan wins for order of work. For product rules, the plan wins wherever it describes the stats-and-price direction above — the brief was written for an earlier, probability-model version of the product and has not been rewritten since the pivot. Where the brief and plan don't conflict (legal wording, 18+, data handling), the brief still wins.
+The full brief is `docs/MASTER_BRIEF.md`. The build plan is `docs/PLAN.md`. If they disagree, the plan wins for order of work. For product rules, the plan wins wherever it describes the direction above — the brief was written for an earlier, probability-model version of the product and has not been rewritten since either pivot (first to stats-and-price, now to betslip analysis). Where the brief and plan don't conflict (legal wording, 18+, data handling), the brief still wins.
 
 Stack: Next.js (TypeScript), Tailwind, shadcn/ui, Supabase (Postgres, Auth), Vercel, the Anthropic API, The Odds API, Sportmonks (football stats, not yet signed up).
 
@@ -38,7 +38,8 @@ Money and data
 - Turn on row-level security for every user-data table.
 
 How the analysis works
-- Numbers come from code and the data providers, not from Claude. Recent form, head-to-head and match stats come from the stats provider; the best UK price, Pinnacle's margin-free fair price and price movement are calculated by our own functions. Claude only writes the plain-English summary and the risks, from the numbers we give it. If Claude's output disagrees with the numbers, the numbers win.
+- Numbers come from code and the data providers, not from Claude. Recent form, head-to-head and match stats come from the stats provider; the best UK price, Pinnacle's margin-free fair price and price movement are calculated by our own functions. Claude only writes the plain-English read on a leg or a slip, from the numbers we give it. If Claude's output disagrees with the numbers, the numbers win.
+- Never show a probability percentage, an edge, or anything that looks like a calculated chance of winning. We have no calibrated model to back one, so form and head-to-head are shown as plain counts and plain sentences ("won 4 of the last 6"), never turned into a percentage.
 - Always check Claude's JSON reply against the schema before showing anything. If it fails twice, show the numbers without the written summary and do not charge a credit.
 - Form, head-to-head, match stats and the price comparison are separate facts. Never merge them into one score or rating.
 - Show the sample size next to every stat we display, especially head-to-head (e.g. "2 wins from the last 5 meetings", not just "40%"), so nobody mistakes a small sample for a sure thing.
@@ -47,6 +48,7 @@ How the analysis works
 
 Product and legal wording
 - Never use "guaranteed", "risk-free", "easy money", "can't lose" or similar. Never imply the AI knows the outcome.
+- Write betslip analysis in plain, neutral language — never exciting or persuasive, and never a nudge toward adding more legs or a bigger stake. State risk clearly. This is a betslip-analysis tool for people who enjoy accumulators, not a value-finding tool for professional bettors — never claim or imply we've found an edge against the market.
 - The product is for adults (18+). Include responsible gambling messaging where the brief and plan say to.
 - Keep every data provider behind an interface so it can be swapped. Record licence terms in `docs/DATA_PROVIDERS.md`.
 
@@ -70,7 +72,7 @@ Fill these in once the project is scaffolded, and keep them current.
 
 ## Current focus
 
-First vertical slice: a Premier League match page showing recent form, head-to-head (with its sample size), shots/possession/corners, next to the price comparison (best UK price, Pinnacle's margin-free fair price, and how the price has moved), plus a short Claude summary and risks. Stats are meant to come from Sportmonks' Starter plan (no expected goals) and odds from The Odds API — neither is signed up for yet. Until then, the fixtures list and match page run on clearly labelled sample data behind provider interfaces, so the screens can be reviewed before any money is spent. Nothing else until this works end to end.
+First vertical slice: build a betslip from Premier League fixtures (Match Winner, Total Corners, Total Cards), then Analyse Bet for a plain-English read — recent form and head-to-head per leg in plain language, the combined price, how many legs need to win, which leg looks weakest and why, and a correlation warning when legs aren't independent. The price comparison (best UK price vs Pinnacle's fair price) is a small secondary detail on the match page, not the main feature. Stats are meant to come from Sportmonks' Starter plan (no expected goals) and odds from The Odds API — neither is signed up for yet. Until then, the fixtures list, match page and betslip analysis run on clearly labelled sample data behind provider interfaces, so the screens can be reviewed before any money is spent. Nothing else until this works end to end.
 
 ## When unsure
 

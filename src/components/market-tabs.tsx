@@ -3,7 +3,7 @@
 import { useState } from "react";
 import { PriceButton } from "@/components/betslip/price-button";
 import type { MatchMarketView } from "@/lib/match/get-match-view";
-import { formatCapturedAt, formatPct, formatPrice, formatSignedPct } from "@/lib/format";
+import { formatPrice } from "@/lib/format";
 
 interface FixtureIdentity {
   fixtureId: string;
@@ -13,7 +13,7 @@ interface FixtureIdentity {
   kickoff: string;
 }
 
-/** Match Winner, Total Corners, Total Cards — one price table at a time, switched by tab. */
+/** Match Winner, Total Corners, Total Cards — one set of price buttons at a time, switched by tab. */
 export function MarketTabs({ markets, fixture }: { markets: MatchMarketView[]; fixture: FixtureIdentity }) {
   const [activeIndex, setActiveIndex] = useState(0);
   const active = markets[activeIndex];
@@ -38,61 +38,52 @@ export function MarketTabs({ markets, fixture }: { markets: MatchMarketView[]; f
         ))}
       </div>
 
-      <p className="mt-3 text-sm text-muted">
-        Pinnacle&apos;s margin on this market is {formatPct(active.pinnacleMarginPct)}. Its fair
-        price below has that margin removed — a reference point, not a prediction.
-      </p>
+      <div className={`mt-3 grid gap-2 ${active.outcomes.length === 3 ? "grid-cols-3" : "grid-cols-2"}`}>
+        {active.outcomes.map((o) => (
+          <PriceButton
+            key={o.outcome}
+            selection={{
+              fixtureId: fixture.fixtureId,
+              competition: fixture.competition,
+              homeTeam: fixture.homeTeam,
+              awayTeam: fixture.awayTeam,
+              kickoff: fixture.kickoff,
+              market: active.market,
+              marketLabel: active.line !== undefined ? `${active.marketLabel} O/U ${active.line}` : active.marketLabel,
+              outcome: o.outcome,
+              price: o.bestUk.price,
+              bookmaker: o.bestUk.bookmaker,
+            }}
+          />
+        ))}
+      </div>
+      <div
+        className={`mt-1.5 grid gap-2 text-center text-[11px] text-muted ${active.outcomes.length === 3 ? "grid-cols-3" : "grid-cols-2"}`}
+      >
+        {active.outcomes.map((o) => (
+          <span key={o.outcome}>{o.bestUk.bookmaker}</span>
+        ))}
+      </div>
 
-      <table className="mt-3 w-full text-left text-sm">
-        <thead>
-          <tr className="border-b border-line text-muted">
-            <th className="py-1.5 font-normal">Outcome</th>
-            <th className="py-1.5 font-normal">Best UK price</th>
-            <th className="py-1.5 font-normal">Pinnacle fair price</th>
-            <th className="py-1.5 font-normal">Price movement</th>
-          </tr>
-        </thead>
-        <tbody>
+      <details className="mt-4 text-xs text-muted">
+        <summary className="cursor-pointer select-none">Price detail (Pinnacle fair price)</summary>
+        <p className="mt-2">
+          A smaller, secondary detail — not the point of this page. Pinnacle is a bookmaker often used
+          as a reference price; removing its built-in margin ({(active.pinnacleMarginPct * 100).toFixed(1)}%
+          on this market) gives a &quot;fair&quot; price, shown below next to the best UK price for the same
+          outcome. This is a fact about the market, not a prediction, and it is not a chance of winning.
+        </p>
+        <ul className="mt-2 flex flex-col gap-1">
           {active.outcomes.map((o) => (
-            <tr key={o.outcome} className="border-b border-line/60 last:border-0">
-              <td className="py-2 align-top font-medium">{o.outcome}</td>
-              <td className="py-2 align-top">
-                <div className="w-28">
-                  <PriceButton
-                    selection={{
-                      fixtureId: fixture.fixtureId,
-                      competition: fixture.competition,
-                      homeTeam: fixture.homeTeam,
-                      awayTeam: fixture.awayTeam,
-                      kickoff: fixture.kickoff,
-                      market: active.market,
-                      marketLabel: active.line !== undefined ? `${active.marketLabel} O/U ${active.line}` : active.marketLabel,
-                      outcome: o.outcome,
-                      price: o.bestUk.price,
-                      bookmaker: o.bestUk.bookmaker,
-                    }}
-                  />
-                </div>
-                <div className="mt-1 text-xs text-muted">
-                  {o.bestUk.bookmaker} · captured {formatCapturedAt(o.bestUk.capturedAt)}
-                </div>
-              </td>
-              <td className="py-2 align-top">
-                {formatPrice(o.fairPrice)}
-                <div className="text-xs text-muted">{formatPct(o.fairProbability)} fair chance</div>
-              </td>
-              <td className="py-2 align-top">
-                {formatPrice(o.openingPrice)} → {formatPrice(o.currentPrice)}
-                <div className="text-xs text-muted">
-                  {o.direction === "unchanged"
-                    ? "unchanged"
-                    : `${o.direction === "up" ? "drifted out" : "shortened"} (${formatSignedPct(o.changePct)})`}
-                </div>
-              </td>
-            </tr>
+            <li key={o.outcome} className="flex justify-between">
+              <span>{o.outcome}</span>
+              <span>
+                best UK {formatPrice(o.bestUk.price)} · Pinnacle fair {formatPrice(o.fairPrice)}
+              </span>
+            </li>
           ))}
-        </tbody>
-      </table>
+        </ul>
+      </details>
     </div>
   );
 }

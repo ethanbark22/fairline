@@ -1,6 +1,8 @@
 import Link from "next/link";
-import { getLegSummaries, formRecord, type LegSummary } from "@/lib/match/get-match-view";
-import { checkCorrelation, combinedPrice } from "@/lib/betslip/combine";
+import { getLegSummaries, type LegSummary } from "@/lib/match/get-match-view";
+import { describeForm, describeHeadToHead } from "@/lib/match/plain-language";
+import { checkCorrelation, combinedPrice, type CorrelationCheck } from "@/lib/betslip/combine";
+import { findWeakestLeg } from "@/lib/betslip/weakest-leg";
 import { parseLegsParam } from "@/lib/betslip/leg-key";
 import { SampleDataBanner } from "@/components/sample-data-banner";
 import { ResponsibleGamblingFooter } from "@/components/responsible-gambling-footer";
@@ -36,18 +38,7 @@ export default async function BetslipAnalysisPage({
           .
         </div>
       ) : (
-        <>
-          <Summary legs={legs} />
-
-          <h2 className="mt-8 font-display text-lg font-semibold">
-            {legs.length} selection{legs.length === 1 ? "" : "s"}
-          </h2>
-          <div className="mt-4 grid grid-cols-1 gap-4 md:grid-cols-2 xl:grid-cols-3">
-            {legs.map((leg, i) => (
-              <LegCard key={`${leg.fixtureId}:${leg.market}:${i}`} leg={leg} correlated={isCorrelated(leg, legs)} />
-            ))}
-          </div>
-        </>
+        <AnalysedSlip legs={legs} />
       )}
 
       <ResponsibleGamblingFooter />
@@ -55,23 +46,55 @@ export default async function BetslipAnalysisPage({
   );
 }
 
-function isCorrelated(leg: LegSummary, allLegs: LegSummary[]): boolean {
-  const correlation = checkCorrelation(toCorrelationInputs(allLegs));
-  return (
-    correlation.sharedFixtures.includes(leg.fixtureId) ||
-    correlation.sharedTeams.includes(leg.home.teamName) ||
-    correlation.sharedTeams.includes(leg.away.teamName)
-  );
-}
-
-function toCorrelationInputs(legs: LegSummary[]) {
+function toCorrelationInputs(legs: readonly LegSummary[]) {
   return legs.map((l) => ({ fixtureId: l.fixtureId, homeTeam: l.home.teamName, awayTeam: l.away.teamName }));
 }
 
-function Summary({ legs }: { legs: LegSummary[] }) {
+function legMatches(a: { fixtureId: string; market: string }, b: { fixtureId: string; market: string }): boolean {
+  return a.fixtureId === b.fixtureId && a.market === b.market;
+}
+
+function AnalysedSlip({ legs }: { legs: LegSummary[] }) {
   const combined = combinedPrice(legs.map((l) => l.outcome.bestUk.price));
   const correlation = checkCorrelation(toCorrelationInputs(legs));
+  const weakest = findWeakestLeg(legs.map((l) => ({ ...l, price: l.outcome.bestUk.price })));
 
+  return (
+    <>
+      <Summary legs={legs} combined={combined} correlation={correlation} weakest={weakest} />
+
+      <h2 className="mt-8 font-display text-lg font-semibold">
+        {legs.length} selection{legs.length === 1 ? "" : "s"}
+      </h2>
+      <div className="mt-4 grid grid-cols-1 gap-4 md:grid-cols-2 xl:grid-cols-3">
+        {legs.map((leg, i) => (
+          <LegCard
+            key={`${leg.fixtureId}:${leg.market}:${i}`}
+            leg={leg}
+            correlated={
+              correlation.sharedFixtures.includes(leg.fixtureId) ||
+              correlation.sharedTeams.includes(leg.home.teamName) ||
+              correlation.sharedTeams.includes(leg.away.teamName)
+            }
+            weakest={weakest !== null && legMatches(weakest, leg)}
+          />
+        ))}
+      </div>
+    </>
+  );
+}
+
+function Summary({
+  legs,
+  combined,
+  correlation,
+  weakest,
+}: {
+  legs: LegSummary[];
+  combined: number;
+  correlation: CorrelationCheck;
+  weakest: LegSummary | null;
+}) {
   return (
     <section className="mt-8 rounded-lg border border-line bg-surface p-5">
       <div className="flex flex-wrap items-baseline justify-between gap-2">
@@ -86,10 +109,19 @@ function Summary({ legs }: { legs: LegSummary[] }) {
         ) : (
           <>
             All <strong>{legs.length}</strong> selections need to win for this bet to pay out — one loss
-            voids the whole slip.
+            and the whole bet loses, the same as any other accumulator.
           </>
         )}
       </p>
+
+      {weakest && (
+        <p className="mt-3 text-sm">
+          <strong>Longest price in the slip:</strong> {weakest.outcome.outcome} in {weakest.home.teamName}{" "}
+          v {weakest.away.teamName} at {formatPrice(weakest.outcome.bestUk.price)}. A longer price is the
+          bookmakers&apos; own way of saying an outcome is less likely — if one leg is going to let this
+          slip down, this is the one to keep an eye on.
+        </p>
+      )}
 
       {correlation.correlated && (
         <p className="mt-3 rounded-md border border-warning/40 bg-warning-bg p-3 text-sm text-warning">
@@ -103,17 +135,23 @@ function Summary({ legs }: { legs: LegSummary[] }) {
       )}
 
       <p className="mt-3 text-xs text-muted">
-        Sample analysis — placeholder numbers, not a real Claude call yet. The full version will add a
-        written take per leg and for the whole slip once the analysis engine is wired up.
+        Sample analysis — placeholder text, not a real Claude call yet. No probability or edge is shown
+        anywhere on this page: we have no calibrated model to back one, so this sticks to what actually
+        happened and lets you judge it.
       </p>
     </section>
   );
 }
 
-function LegCard({ leg, correlated }: { leg: LegSummary; correlated: boolean }) {
-  const home = formRecord(leg.home.form);
-  const away = formRecord(leg.away.form);
-
+function LegCard({
+  leg,
+  correlated,
+  weakest,
+}: {
+  leg: LegSummary;
+  correlated: boolean;
+  weakest: boolean;
+}) {
   return (
     <div className="flex flex-col rounded-lg border border-line bg-surface p-4">
       <div className="flex items-start justify-between gap-2">
@@ -123,11 +161,18 @@ function LegCard({ leg, correlated }: { leg: LegSummary; correlated: boolean }) 
           </p>
           <p className="text-xs text-muted">{formatKickoff(leg.kickoff)}</p>
         </div>
-        {correlated && (
-          <span className="rounded-full border border-warning/40 bg-warning-bg px-2 py-0.5 text-[11px] whitespace-nowrap text-warning">
-            Correlated
-          </span>
-        )}
+        <div className="flex flex-col items-end gap-1">
+          {weakest && (
+            <span className="rounded-full border border-danger/40 bg-danger/10 px-2 py-0.5 text-[11px] whitespace-nowrap text-danger">
+              Longest price
+            </span>
+          )}
+          {correlated && (
+            <span className="rounded-full border border-warning/40 bg-warning-bg px-2 py-0.5 text-[11px] whitespace-nowrap text-warning">
+              Correlated
+            </span>
+          )}
+        </div>
       </div>
 
       <div className="mt-3 rounded-md bg-surface-2 p-2.5">
@@ -138,36 +183,19 @@ function LegCard({ leg, correlated }: { leg: LegSummary; correlated: boolean }) 
         </p>
       </div>
 
-      <div className="mt-3 grid grid-cols-2 gap-3 text-xs">
-        <div>
-          <p className="text-muted">{leg.home.teamName} form</p>
-          <p className="font-medium">
-            {home.wins}W–{home.draws}D–{home.losses}L{" "}
-            <span className="text-muted">(last {leg.home.form.sampleSize})</span>
-          </p>
-        </div>
-        <div>
-          <p className="text-muted">{leg.away.teamName} form</p>
-          <p className="font-medium">
-            {away.wins}W–{away.draws}D–{away.losses}L{" "}
-            <span className="text-muted">(last {leg.away.form.sampleSize})</span>
-          </p>
-        </div>
-      </div>
+      <p className="mt-3 text-xs">{describeForm(leg.home.teamName, leg.home.form)}</p>
+      <p className="mt-1 text-xs">{describeForm(leg.away.teamName, leg.away.form)}</p>
 
-      <div className="mt-3 border-t border-line pt-2.5 text-xs">
-        <p className="text-muted">Head-to-head ({leg.headToHead.sampleSize})</p>
-        <p className="font-medium">
-          {leg.headToHead.record.teamAWins}–{leg.headToHead.record.draws}–{leg.headToHead.record.teamBWins}
-          {leg.headToHead.meetings[0] && (
-            <span className="text-muted">
-              {" "}
-              · last: {leg.headToHead.meetings[0].homeTeam} {leg.headToHead.meetings[0].homeGoals}–
-              {leg.headToHead.meetings[0].awayGoals} {leg.headToHead.meetings[0].awayTeam}
-            </span>
-          )}
-        </p>
-      </div>
+      <p className="mt-3 border-t border-line pt-2.5 text-xs">
+        {describeHeadToHead(leg.home.teamName, leg.away.teamName, leg.headToHead.record, leg.headToHead.sampleSize)}
+        {leg.headToHead.meetings[0] && (
+          <span className="text-muted">
+            {" "}
+            Last time: {leg.headToHead.meetings[0].homeTeam} {leg.headToHead.meetings[0].homeGoals}–
+            {leg.headToHead.meetings[0].awayGoals} {leg.headToHead.meetings[0].awayTeam}.
+          </span>
+        )}
+      </p>
     </div>
   );
 }

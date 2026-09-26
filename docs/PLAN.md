@@ -1,12 +1,12 @@
 In plain English
 
-We are building a website where you pick a Premier League match, and it shows you the facts a careful bettor would check by hand: recent form, the head-to-head record, and shots/possession/corners, next to what the bookmakers are offering — the best UK price, Pinnacle's price with its margin taken out (a fair-price reference point), and how the price has moved. Claude writes a short plain-English summary of the match and points out what could go wrong, using only the numbers we give it. It never predicts a result, never scores an "edge", and never takes bets or promises wins.
+We are building a betslip-analysis tool for regular football fans who enjoy a Premier League accumulator — not a value-finding tool for professional bettors hunting small edges against the market. You pick prices across three markets (Match Winner, Corners, Cards) to build a betslip, then click Analyse Bet and get a plain-English read: for each leg, recent form and head-to-head written as plain sentences (e.g. "won 4 of the last 6"), and for the whole slip, the combined price, how many things need to go right, which leg looks weakest and why, and a clear warning if any legs in the slip aren't independent. It never scores a probability or an edge — we have no calibrated model to back one — and it never takes bets or promises wins.
 
-Where the numbers come from. A stats service (Sportmonks) supplies form, head-to-head and match stats. A paid odds service (The Odds API) supplies bookmaker prices. Our own code removes Pinnacle's margin to get a fair price and works out how prices have moved. Claude only writes the words; it does not make up any number, and every stat we show carries the sample size it's based on.
-What it costs. About €29/month (~£25) for stats once we sign up, plus about $30/month for odds once the model has proved itself worth building on, plus roughly one or two US cents each time someone reads a match summary.
+Where the numbers come from. A stats service (Sportmonks) supplies form and head-to-head. A paid odds service (The Odds API) supplies bookmaker prices, used mainly to build the betslip and, as a smaller secondary detail, to remove Pinnacle's margin for a fair-price reference. Claude only writes the words; it does not make up any number, and every stat we show carries the sample size it's based on.
+What it costs. About €29/month (~£25) for stats once we sign up, plus about $30/month for odds once the screens have proved themselves worth building on, plus roughly one or two US cents each time someone analyses a slip.
 What you do. Create a few accounts, paste in two keys, approve the changes Claude Code proposes, and check that the screens look right.
 What we build first. One league, one screen, working on sample data before any money is spent. Everything else waits until that works.
-What could stop a public launch. Data licence questions and UK gambling advertising rules. These need proper advice, not just code.
+What could stop a public launch. Data licence questions and UK gambling advertising rules — analysing a user's own accumulator sits closer to tipping/gambling advice than plain research did, so this needs proper advice, not just code.
 
 Words you will keep seeing
 
@@ -34,8 +34,8 @@ Starting point	Fresh Next.js (TypeScript, Tailwind, shadcn/ui) repo	No existing 
 First slice	Premier League, one match page	The example in the brief; deep bookmaker coverage, and Sportmonks covers it from its cheapest paid plan
 Stats source	Sportmonks Starter plan (~€29/month, no expected goals) — not signed up yet	Cheapest option whose own terms clearly allow commercial use; see `docs/DATA_PROVIDERS.md`. We build on sample data until we're ready to pay.
 Odds source	The Odds API behind an OddsProvider interface	Swappable later for SportsDataIO or Sportradar
-Claude's role	Writes a short plain-English summary and risks from the numbers we supply; never calculates a stat, a price or anything that looks like a probability	No in-house probability model — see "Changes to the brief" below
-Positioning	Research and price comparison only, 18+, no bets accepted	Keeps the MVP outside sportsbook licensing
+Claude's role	Writes a plain-English read of a leg and of the whole slip (form, head-to-head, weakest leg, risk) from the numbers we supply; never calculates a stat, a price, a probability or an edge	No in-house probability model — see "Changes to the brief" below
+Positioning	Betslip analysis for regular punters building accumulators, not a value-finding tool for professional bettors; 18+, no bets accepted	Keeps the MVP outside sportsbook licensing, and matches who actually uses it
 
 Three things I am assuming and will flag again where they matter: scheduled worker routes on Vercel or Supabase (no Redis/BullMQ yet) are enough for ingestion at MVP scale, Sportmonks' Starter plan is enough for form, head-to-head and match stats without expected goals, and the first launch market is the UK.
 
@@ -68,8 +68,9 @@ Save every analysis as an immutable prediction, for later calibration checking	D
 Build Stripe, tiers and credits in Phase 8	Free launch first; keep a simple free-summary limit only	No revenue to protect yet, and payments code is costly to build and maintain
 Sentry, PostHog, Redis, BullMQ early	Leave out until there are real users	Each adds cost or complexity for no MVP benefit
 Five sports, many markets	One league and one screen until it reads well	Every extra market multiplies stats and odds usage, and testing
+Positions the product around finding value against the market (edge, minimum price)	Second pivot: a betslip-analysis tool for regular punters who enjoy accumulators. Plain-English form and head-to-head per leg, slip-level risk (combined price, how many things need to go right, the weakest leg, the correlation warning). The price comparison (best UK price vs Pinnacle's fair price) stays in the codebase as a small secondary detail on the match page, not the main feature.	The brief's target user is a professional or semi-professional bettor chasing edges. Our actual early users are ordinary fans building accumulators for fun, who want a plain-English sanity check on their slip, not a probability model dressed up as insight we can't back.
 
-A plain warning. Bookmaker prices on football match results are already very accurate, and a simple in-house model would usually land close to the market or slightly worse. Rather than dress that up as an "edge", this product shows the same facts a knowledgeable bettor already checks — form, head-to-head, match stats and the price gap to Pinnacle's fair price — clearly, with their sample sizes, and lets the reader judge. That is a smaller promise, but an honest one, and much cheaper to build and keep correct.
+A plain warning. Bookmaker prices on football match results are already very accurate, and a simple in-house model would usually land close to the market or slightly worse. Rather than dress that up as an "edge", this product shows the same facts a knowledgeable fan already checks — recent form and head-to-head, in plain language, plus a plain-spoken read of the risk in the slip as a whole — and lets the reader judge. That is a smaller promise, but an honest one, and much cheaper to build and keep correct.
 
 Architecture
 
@@ -93,8 +94,8 @@ Module	Responsibility
 lib/providers/odds	OddsProvider interface; SampleOddsProvider now, OddsApiProvider later
 lib/providers/stats	FootballStatsProvider interface; SampleFootballStatsProvider now, SportmonksStatsProvider later (not signed up yet)
 lib/ingest	Zod-validated fetch, entity mapping, snapshot writes, failure logging (built once we're ingesting real data)
-lib/price	Implied probability, margin removal (Pinnacle's fair price), price movement
-lib/ai	Research packet builder, prompt, Claude call, output schema validation — writes prose only, never a number
+lib/price	Implied probability, margin removal (Pinnacle's fair price), price movement — now a small secondary detail on the match page, and used internally to pick out a slip's weakest leg by market-implied price, not the product's headline feature
+lib/ai	Research packet builder, prompt, Claude call, output schema validation — writes prose only, never a number. Builds both a single-leg packet (form, head-to-head) and a whole-slip packet (every leg plus the correlation check)
 app/api/*	Public endpoints; internal worker routes are separate and secret-guarded
 
 Caching. Current prices and current stats live in views/tables refreshed by the workers, so ten users or ten thousand read the same row. Match summaries are cached by a hash of fixture, stats snapshot, price snapshot and prompt version; a cache hit costs no Claude call. Claude is called only on a summary request, never on a page view.
@@ -195,14 +196,14 @@ AI output	Valid JSON passes; missing field or prose-wrapped JSON fails; Claude's
 Ledger	UPDATE and DELETE on `odds_snapshots` (and later `stats_snapshots`) raise
 Security	RLS blocks reading another user's data; worker routes reject a missing CRON_SECRET
 
-First UI screens. Visual direction is a real sportsbook (bet365-style price buttons and betslip) in a dark, dense theme with its own colour palette and type (Space Grotesk for headings and prices, Inter for body and tables), while staying strictly research-and-analysis: nothing here places a bet or moves money. Built first on sample data, then wired to real providers once we sign up.
+First UI screens. Visual direction is a real sportsbook (bet365-style price buttons and betslip) in a dark, dense theme with its own colour palette and type (Space Grotesk for headings and prices, Inter for body and tables), while staying strictly a betslip-analysis tool: nothing here places a bet or moves money, and nothing claims to have found value against the market. Built first on sample data, then wired to real providers once we sign up.
 
-Markets covered: Match Winner (1X2), Total Corners (Over/Under a line) and Total Cards (Over/Under a line), each with the same best-UK/Pinnacle-fair-price/price-movement treatment. More markets can be added later behind the same `MarketKey` pattern in `lib/providers/odds/types.ts`.
+Markets covered: Match Winner (1X2), Total Corners (Over/Under a line) and Total Cards (Over/Under a line). More markets can be added later behind the same `MarketKey` pattern in `lib/providers/odds/types.ts`.
 
-Fixtures list for the Premier League: one row per match with the Match Winner market's best UK price and Pinnacle's fair price per outcome, three clickable price buttons (Home/Draw/Away) per row, a timestamp on every price, and badges naming the other markets (Corners, Cards) available on the match page — kept off the list itself so it doesn't get cluttered, the same way a sportsbook's front page shows one market and the event page shows the rest.
-Match page: recent form, head-to-head (with sample size), shots/possession/corners/cards (with sample size), a market-tab switcher (Match Winner / Total Corners / Total Cards) with clickable price buttons, fair price and price movement per market, and a short Claude summary with what could go wrong.
+Fixtures list for the Premier League: one row per match with the Match Winner market's best UK price, three clickable price buttons (Home/Draw/Away) per row, a timestamp on every price, and badges naming the other markets (Corners, Cards) available on the match page — kept off the list itself so it doesn't get cluttered, the same way a sportsbook's front page shows one market and the event page shows the rest.
+Match page: recent form, head-to-head (with sample size) and shots/possession/corners/cards (with sample size) as the main content, a market-tab switcher (Match Winner / Total Corners / Total Cards) with clickable price buttons to add to the betslip, and Pinnacle's fair price shown as a small secondary line under each market — a detail for the curious, not the point of the page.
 Betslip: a fixed sidebar on desktop (a slide-up sheet from a bottom bar on narrow screens), holding one or more selections as an accumulator, each leg removable, with the combined price shown. A slip can hold at most one leg per (fixture, market) pair — picking a different outcome in the same market swaps the leg. Legs sharing a match (even across different markets), or sharing a team across different matches, are flagged as possibly correlated instead of folded into a single "true" combined chance — see the rule in CLAUDE.md.
-"Analyse Bet" (never "Place Bet") takes the user to a full-page analysis screen (`/betslip/analysis`) instead of growing the sidebar — a brief loading state, then a summary (combined price, how many legs need to win, the correlation warning) followed by each leg as its own card in a responsive grid, with its price and a compact form/head-to-head summary, easy to scan even at 8-10 legs. Placeholder, clearly labelled sample content for now, wired to the real analysis engine (lib/ai) later. It never places a bet or moves money.
+"Analyse Bet" (never "Place Bet") takes the user to a full-page analysis screen (`/betslip/analysis`) instead of growing the sidebar — a brief loading state, then a plain-English read of the slip. A summary states the combined price, how many selections need to win, which leg the market rates least likely (using Pinnacle's fair price only to pick it out, never to claim we know better than the market), and the correlation warning when legs aren't independent. Below that, each leg gets its own card in a responsive grid — the match, the selection and price, and recent form and head-to-head written as plain sentences ("Arsenal have won 4 of their last 6"), never a percentage or an edge, since we have no calibrated model to back one. Written in plain, neutral language throughout — never exciting or persuasive, never a nudge to add more legs. Placeholder, clearly labelled sample content for now (structured text, not yet a real Claude call), wired to the real analysis engine (lib/ai) later. It never places a bet or moves money.
 Sign-in through Supabase Auth with an 18+ confirmation and responsible gambling footer (later, once accounts are needed) — the footer and 18+ messaging are already on every screen, including the betslip itself.
 
 Picks and pricing pages come in later phases.
@@ -236,7 +237,7 @@ Odds API "primary product" clause	Display is allowed only if the data is not the
 Bookmaker names, logos, affiliate links	The terms I read are silent on these	Get written confirmation; log in DATA_PROVIDERS.md
 Sportmonks not signed up	Stats screens run on sample data until we pay	Sign up once the screens are approved (see build order)
 No injury or lineup source	Match pages are missing this context for now	Evaluate a provider after slice 1
-UK gambling and advertising rules	Price comparison could be read as tipping; affiliate promotion is regulated	Legal advice on Gambling Commission, ASA and CAP rules, and required responsible gambling wording
+UK gambling and advertising rules	Analysing a user's own accumulator sits closer to tipping/gambling advice than plain research did, especially "which leg looks weakest"; affiliate promotion is also regulated	Legal advice on Gambling Commission, ASA and CAP rules, and required responsible gambling wording, with extra care now the product is framed around betslip analysis
 Privacy and age gating	18+ product handling personal data	GDPR review, account deletion and data export, age confirmation at sign-up
 Vercel plan	Hobby is non-commercial only and limits cron to once a day	Move to Pro when charging, or use Supabase pg_cron in the meantime
 

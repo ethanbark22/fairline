@@ -3,7 +3,7 @@ import { listFixtures } from "@/lib/match/get-match-view";
 import { SampleDataBanner } from "@/components/sample-data-banner";
 import { ResponsibleGamblingFooter } from "@/components/responsible-gambling-footer";
 import { PriceButton } from "@/components/betslip/price-button";
-import { formatKickoff, formatPrice } from "@/lib/format";
+import { formatKickoff } from "@/lib/format";
 
 export default async function FixturesPage() {
   const fixtures = await listFixtures();
@@ -14,8 +14,8 @@ export default async function FixturesPage() {
         Fair<span className="text-brand">line</span>
       </h1>
       <p className="mt-2 text-sm text-muted">
-        Recent form, head-to-head and match stats next to the bookmaker prices. Research and price
-        comparison only — Fairline does not take bets and cannot know results.
+        Build a betslip from Premier League form, head-to-head and match stats, then get a
+        plain-English read on it. Fairline does not take bets and cannot know results.
       </p>
 
       <div className="mt-6">
@@ -24,9 +24,8 @@ export default async function FixturesPage() {
 
       <h2 className="mt-8 font-display text-lg font-semibold">Premier League</h2>
       <p className="text-xs text-muted">
-        Click a price to add it to your betslip. Prices are the best UK price per outcome — see
-        each match page for Pinnacle&apos;s fair price, how it has moved, and the corners and
-        cards markets.
+        Click a price to add it to your betslip. See each match page for recent form,
+        head-to-head, and the corners and cards markets.
       </p>
 
       <ul className="mt-4 flex flex-col gap-3">
@@ -66,9 +65,7 @@ export default async function FixturesPage() {
             </div>
             <div className="mt-1.5 grid grid-cols-3 gap-2 text-center text-[11px] text-muted">
               {fixture.outcomes.map((o) => (
-                <span key={o.outcome}>
-                  {o.bestUk.bookmaker} · fair {formatPrice(o.fairPrice)}
-                </span>
+                <span key={o.outcome}>{o.bestUk.bookmaker}</span>
               ))}
             </div>
 

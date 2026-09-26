@@ -35,6 +35,13 @@ const SAMPLE_FIXTURES: FixtureSummary[] = [
     awayTeam: SAMPLE_TEAMS["man-utd"],
     kickoff: "2026-10-05T15:00:00Z",
   },
+  {
+    fixtureId: "fx-4",
+    competition: COMPETITION,
+    homeTeam: SAMPLE_TEAMS.chelsea,
+    awayTeam: SAMPLE_TEAMS.newcastle,
+    kickoff: "2026-10-05T17:30:00Z",
+  },
 ];
 
 // outcome -> { bestUk bookmaker/price, raw Pinnacle price, opening/current best-UK price }
@@ -106,6 +113,29 @@ const SAMPLE_PRICES: Record<string, OutcomePriceComparison[]> = {
       pinnaclePrice: 2.75,
       opening: { price: 2.9, capturedAt: "2026-09-28T09:00:00Z" },
       current: { price: 2.7, capturedAt: "2026-10-04T09:00:00Z" },
+    },
+  ],
+  "fx-4": [
+    {
+      outcome: "Home",
+      bestUk: { outcome: "Home", bookmaker: "William Hill", price: 1.95, capturedAt: "2026-10-04T09:00:00Z" },
+      pinnaclePrice: 1.92,
+      opening: { price: 2.05, capturedAt: "2026-09-28T09:00:00Z" },
+      current: { price: 1.95, capturedAt: "2026-10-04T09:00:00Z" },
+    },
+    {
+      outcome: "Draw",
+      bestUk: { outcome: "Draw", bookmaker: "Bet365", price: 3.8, capturedAt: "2026-10-04T09:00:00Z" },
+      pinnaclePrice: 3.75,
+      opening: { price: 3.7, capturedAt: "2026-09-28T09:00:00Z" },
+      current: { price: 3.8, capturedAt: "2026-10-04T09:00:00Z" },
+    },
+    {
+      outcome: "Away",
+      bestUk: { outcome: "Away", bookmaker: "Sky Bet", price: 4.3, capturedAt: "2026-10-04T09:00:00Z" },
+      pinnaclePrice: 4.4,
+      opening: { price: 4.0, capturedAt: "2026-09-28T09:00:00Z" },
+      current: { price: 4.3, capturedAt: "2026-10-04T09:00:00Z" },
     },
   ],
 };

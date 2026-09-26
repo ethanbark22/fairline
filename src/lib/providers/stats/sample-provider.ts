@@ -114,6 +114,18 @@ const SAMPLE_HEAD_TO_HEAD: HeadToHeadKey[] = [
       { date: "2024-04-02", competition: "Premier League", homeTeam: "Manchester United", awayTeam: "Newcastle United", homeGoals: 2, awayGoals: 0 },
     ],
   },
+  {
+    teamAId: "chelsea",
+    teamBId: "newcastle",
+    record: { teamAWins: 3, draws: 0, teamBWins: 2 },
+    meetings: [
+      { date: "2026-01-18", competition: "Premier League", homeTeam: "Newcastle United", awayTeam: "Chelsea", homeGoals: 1, awayGoals: 2 },
+      { date: "2025-08-30", competition: "Premier League", homeTeam: "Chelsea", awayTeam: "Newcastle United", homeGoals: 1, awayGoals: 0 },
+      { date: "2025-02-15", competition: "Premier League", homeTeam: "Newcastle United", awayTeam: "Chelsea", homeGoals: 2, awayGoals: 1 },
+      { date: "2024-10-26", competition: "Premier League", homeTeam: "Chelsea", awayTeam: "Newcastle United", homeGoals: 3, awayGoals: 1 },
+      { date: "2024-03-23", competition: "Premier League", homeTeam: "Newcastle United", awayTeam: "Chelsea", homeGoals: 0, awayGoals: 1 },
+    ],
+  },
 ];
 
 const STATS_SAMPLE_SIZE = 6;

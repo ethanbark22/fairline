@@ -195,13 +195,15 @@ AI output	Valid JSON passes; missing field or prose-wrapped JSON fails; Claude's
 Ledger	UPDATE and DELETE on `odds_snapshots` (and later `stats_snapshots`) raise
 Security	RLS blocks reading another user's data; worker routes reject a missing CRON_SECRET
 
-First UI screens. Visual direction is sportsbook meets TradingView: dense, dark-friendly, no walls of AI text. Built first on sample data (this session), then wired to real providers once we sign up.
+First UI screens. Visual direction is a real sportsbook (bet365-style price buttons and betslip), while staying strictly research-and-analysis: nothing here places a bet or moves money. Built first on sample data, then wired to real providers once we sign up.
 
-Fixtures list for the Premier League with best UK price and Pinnacle's fair price per outcome, and a timestamp on every price.
-Match page: recent form, head-to-head (with sample size), shots/possession/corners (with sample size), the price comparison and how the price has moved, and a short Claude summary with what could go wrong.
-Sign-in through Supabase Auth with an 18+ confirmation and responsible gambling footer (later, once accounts are needed).
+Fixtures list for the Premier League: one row per match with best UK price and Pinnacle's fair price per outcome, three clickable price buttons (Home/Draw/Away) per row, and a timestamp on every price.
+Match page: recent form, head-to-head (with sample size), shots/possession/corners (with sample size), the same clickable price buttons, price movement, and a short Claude summary with what could go wrong.
+Betslip: a fixed sidebar on desktop (a slide-up sheet from a bottom bar on narrow screens), holding one or more selections as an accumulator, each leg removable, with the combined price shown. Legs sharing a match or a team are flagged as possibly correlated instead of folded into a single "true" combined chance — see the rule in CLAUDE.md.
+"Analyse Bet" (never "Place Bet") triggers the site's analysis of the slip — placeholder, clearly labelled sample text for now, wired to the real analysis engine (lib/ai) later. It never places a bet or moves money.
+Sign-in through Supabase Auth with an 18+ confirmation and responsible gambling footer (later, once accounts are needed) — the footer and 18+ messaging are already on every screen, including the betslip itself.
 
-Betslip, picks and pricing pages come in later phases.
+Picks and pricing pages come in later phases.
 
 Cost per match summary and monthly budget
 

@@ -4,6 +4,7 @@ import { notFound } from "next/navigation";
 import { getMatchView, type TeamMatchView } from "@/lib/match/get-match-view";
 import { SampleDataBanner } from "@/components/sample-data-banner";
 import { ResponsibleGamblingFooter } from "@/components/responsible-gambling-footer";
+import { PriceButton } from "@/components/betslip/price-button";
 import {
   formatCapturedAt,
   formatKickoff,
@@ -53,10 +54,22 @@ export default async function MatchPage({ params }: { params: Promise<{ id: stri
               <tr key={o.outcome} className="border-b border-current/10 last:border-0">
                 <td className="py-2 align-top font-medium">{o.outcome}</td>
                 <td className="py-2 align-top">
-                  {formatPrice(o.bestUk.price)}{" "}
-                  <span className="opacity-60">({o.bestUk.bookmaker})</span>
-                  <div className="text-xs opacity-60">
-                    captured {formatCapturedAt(o.bestUk.capturedAt)}
+                  <div className="w-28">
+                    <PriceButton
+                      selection={{
+                        fixtureId: match.fixtureId,
+                        competition: match.competition,
+                        homeTeam: match.home.teamName,
+                        awayTeam: match.away.teamName,
+                        kickoff: match.kickoff,
+                        outcome: o.outcome,
+                        price: o.bestUk.price,
+                        bookmaker: o.bestUk.bookmaker,
+                      }}
+                    />
+                  </div>
+                  <div className="mt-1 text-xs opacity-60">
+                    {o.bestUk.bookmaker} · captured {formatCapturedAt(o.bestUk.capturedAt)}
                   </div>
                 </td>
                 <td className="py-2 align-top">

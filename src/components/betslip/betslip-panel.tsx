@@ -71,15 +71,15 @@ export function BetslipPanel() {
         <button
           type="button"
           onClick={() => setMobileOpen(true)}
-          className="fixed inset-x-0 bottom-0 z-40 flex items-center justify-between border-t border-line bg-surface px-4 py-3 text-sm"
+          className="fixed inset-x-0 bottom-0 z-40 flex items-center justify-between border-t-4 border-accent bg-header-bg px-4 py-3 text-sm font-semibold text-header-foreground active:scale-[0.98]"
         >
           <span className="flex items-center gap-2">
-            <span className="inline-block h-2 w-2 rounded-full bg-brand" />
+            <span className="inline-block h-2 w-2 animate-pulse rounded-full bg-accent shadow-[0_0_8px_var(--accent)]" />
             {selections.length === 0
               ? "Betslip · no selections"
               : `Betslip · ${selections.length} selection${selections.length === 1 ? "" : "s"}`}
           </span>
-          {price !== null && <span className="font-display font-semibold tabular-nums">{formatPrice(price)}</span>}
+          {price !== null && <span className="font-display font-bold tabular-nums text-accent">{formatPrice(price)}</span>}
         </button>
 
         {mobileOpen && (
@@ -178,7 +178,7 @@ function BetslipBody({
             type="button"
             onClick={onAnalyse}
             disabled={analysing}
-            className="mt-3 flex w-full items-center justify-center gap-2 rounded-lg bg-brand py-2.5 text-sm font-semibold text-brand-foreground transition hover:brightness-110 disabled:opacity-70"
+            className="mt-3 flex w-full items-center justify-center gap-2 rounded-lg bg-accent py-2.5 text-sm font-bold uppercase tracking-wide text-accent-foreground shadow-[0_0_14px_var(--accent)] transition hover:brightness-110 active:scale-95 disabled:opacity-70"
           >
             {analysing && (
               <span className="h-3.5 w-3.5 animate-spin rounded-full border-2 border-brand-foreground/40 border-t-brand-foreground" />

@@ -3,31 +3,46 @@
 import Link from "next/link";
 import { useAuth } from "@/components/auth/auth-context";
 
-/** A slim bar on every page: the wordmark, and sign-in status on the right. */
+/** A bold sportsbook-style top bar on every page: the logo on the left, sign-in status on the right. */
 export function SiteHeader() {
   const { user, loading, signOut } = useAuth();
 
   return (
-    <header className="border-b border-line bg-surface px-4 py-2.5">
+    <header className="border-b-4 border-accent bg-header-bg px-4 py-3 text-header-foreground shadow-lg">
       <div className="mx-auto flex max-w-5xl items-center justify-between">
-        <Link href="/" className="font-display text-sm font-semibold">
-          Fair<span className="text-brand">line</span>
+        <Link href="/" className="flex items-center gap-2 transition hover:opacity-90 active:scale-95">
+          <span className="flex h-8 w-8 items-center justify-center rounded-full bg-accent text-base font-black text-accent-foreground shadow-[0_0_12px_var(--accent)]">
+            F
+          </span>
+          <span className="font-display text-xl font-extrabold tracking-tight uppercase">
+            Fair<span className="text-accent">line</span>
+          </span>
         </Link>
 
-        <div className="text-sm">
+        <div className="text-sm font-semibold">
           {loading ? null : user ? (
             <div className="flex items-center gap-3">
-              <span className="text-muted">{user.displayName ?? user.email}</span>
-              <button type="button" onClick={() => signOut()} className="text-brand underline">
+              <span className="text-header-foreground/80">{user.displayName ?? user.email}</span>
+              <button
+                type="button"
+                onClick={() => signOut()}
+                className="rounded-full border border-header-foreground/30 px-3 py-1 text-xs uppercase tracking-wide transition hover:border-accent hover:text-accent active:scale-95"
+              >
                 Log out
               </button>
             </div>
           ) : (
-            <div className="flex items-center gap-3">
-              <Link href="/signin" className="text-muted hover:text-foreground">
+            <div className="flex items-center gap-2">
+              <Link
+                href="/signin"
+                className="rounded-full px-3 py-1.5 text-xs uppercase tracking-wide text-header-foreground/80 transition hover:text-accent active:scale-95"
+              >
                 Sign in
               </Link>
-              <Link href="/signup" className="text-brand underline">
+              <Link
+                href="/signup"
+                className="rounded-full bg-accent px-3 py-1.5 text-xs font-bold uppercase tracking-wide text-accent-foreground shadow-[0_0_10px_var(--accent)] transition hover:brightness-110 active:scale-95"
+              >
                 Sign up
               </Link>
             </div>

@@ -77,7 +77,7 @@ export default function SignInPage() {
         <button
           type="submit"
           disabled={submitting}
-          className="mt-2 rounded-lg bg-brand py-2.5 text-sm font-semibold text-brand-foreground transition hover:brightness-110 disabled:opacity-70"
+          className="mt-2 rounded-lg bg-accent py-2.5 text-sm font-bold uppercase tracking-wide text-accent-foreground shadow-[0_0_14px_var(--accent)] transition hover:brightness-110 active:scale-95 disabled:opacity-70"
         >
           {submitting ? "Logging in…" : "Log in"}
         </button>

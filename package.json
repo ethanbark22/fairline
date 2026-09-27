@@ -16,6 +16,7 @@
     "odds:compare": "NODE_USE_ENV_PROXY=1 NODE_NO_WARNINGS=1 tsx scripts/compare-uk-vs-pinnacle.ts"
   },
   "dependencies": {
+    "@supabase/supabase-js": "^2.117.2",
     "next": "16.3.6",
     "react": "19.2.8",
     "react-dom": "19.2.8",

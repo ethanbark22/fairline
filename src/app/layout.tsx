@@ -1,6 +1,8 @@
 import type { Metadata } from "next";
 import { Inter, Space_Grotesk } from "next/font/google";
 import "./globals.css";
+import { AuthProvider } from "@/components/auth/auth-context";
+import { SiteHeader } from "@/components/site-header";
 import { BetslipProvider } from "@/components/betslip/betslip-context";
 import { BetslipPanel } from "@/components/betslip/betslip-panel";
 
@@ -27,10 +29,15 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
       className={`${bodyFont.variable} ${displayFont.variable} h-full antialiased`}
     >
       <body className="min-h-full flex flex-col bg-background text-foreground">
-        <BetslipProvider>
-          <div className="flex min-h-full flex-1 flex-col pb-14 lg:mr-80 lg:pb-0">{children}</div>
-          <BetslipPanel />
-        </BetslipProvider>
+        <AuthProvider>
+          <BetslipProvider>
+            <div className="flex min-h-full flex-1 flex-col pb-14 lg:mr-80 lg:pb-0">
+              <SiteHeader />
+              {children}
+            </div>
+            <BetslipPanel />
+          </BetslipProvider>
+        </AuthProvider>
       </body>
     </html>
   );

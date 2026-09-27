@@ -204,7 +204,7 @@ Fixtures list for the Premier League: one row per match with the Match Winner ma
 Match page: recent form, head-to-head (with sample size) and shots/possession/corners/cards (with sample size) as the main content, a market-tab switcher (Match Winner / Total Corners / Total Cards) with clickable price buttons to add to the betslip, and Pinnacle's fair price shown as a small secondary line under each market — a detail for the curious, not the point of the page.
 Betslip: a fixed sidebar on desktop (a slide-up sheet from a bottom bar on narrow screens), holding one or more selections as an accumulator, each leg removable, with the combined price shown. A slip can hold at most one leg per (fixture, market) pair — picking a different outcome in the same market swaps the leg. Legs sharing a match (even across different markets), or sharing a team across different matches, are flagged as possibly correlated instead of folded into a single "true" combined chance — see the rule in CLAUDE.md.
 "Analyse Bet" (never "Place Bet") takes the user to a full-page analysis screen (`/betslip/analysis`) instead of growing the sidebar — a brief loading state, then a plain-English read of the slip. A summary states the combined price, how many selections need to win, which leg the market rates least likely (using Pinnacle's fair price only to pick it out, never to claim we know better than the market), and the correlation warning when legs aren't independent. Below that, each leg gets its own card in a responsive grid — the match, the selection and price, and recent form and head-to-head written as plain sentences ("Arsenal have won 4 of their last 6"), never a percentage or an edge, since we have no calibrated model to back one. Written in plain, neutral language throughout — never exciting or persuasive, never a nudge to add more legs. Placeholder, clearly labelled sample content for now (structured text, not yet a real Claude call), wired to the real analysis engine (lib/ai) later. It never places a bet or moves money.
-Sign-in through Supabase Auth with an 18+ confirmation and responsible gambling footer (later, once accounts are needed) — the footer and 18+ messaging are already on every screen, including the betslip itself.
+Sign-up and sign-in through an AuthClient interface (`lib/auth/types.ts`) — the same swappable-provider pattern as stats and odds. A SampleAuthClient (accounts in this browser's localStorage, plainly labelled as sample and not a real account system) runs today; a SupabaseAuthClient exists and takes over automatically once NEXT_PUBLIC_SUPABASE_URL and NEXT_PUBLIC_SUPABASE_ANON_KEY are set — no code change needed to switch. Sign-up requires the 18+ confirmation before an account is created, checked by the client itself, not just the form. A slim header on every page shows the signed-in user's name (or email) with a log-out link, or Sign in / Sign up links when signed out. No subscriptions, credits or payments yet — just the account. The responsible gambling footer and 18+ messaging are on the sign-up and sign-in screens too.
 
 Picks and pricing pages come in later phases.
 
@@ -250,7 +250,8 @@ Order	Work	Status / needs from you
 3	Go or no-go on paying for Sportmonks and The Odds API	Your decision, based on the screens
 4	OddsApiProvider and SportmonksStatsProvider, ingestion routes, snapshots	Both API keys
 5	Claude summary and caching	Anthropic API key
-6	Real screens wired to real data, sign-in	Design feedback
+6	Real screens wired to real data	Design feedback
+7	Sign-up/sign-in built (sample accounts); create the real Supabase project to persist accounts between visits	A Supabase project — your decision on when
 
 Open questions (defaults assumed if not answered):
 

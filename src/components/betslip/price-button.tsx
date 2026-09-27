@@ -14,14 +14,16 @@ export function PriceButton({ selection }: { selection: BetslipSelection }) {
       type="button"
       onClick={() => toggleSelection(selection)}
       aria-pressed={selected}
-      className={`flex w-full flex-col items-center rounded-lg border px-2 py-1.5 text-sm transition ${
+      className={`flex w-full flex-col items-center rounded-lg border-2 px-2 py-1.5 text-sm font-semibold transition active:scale-95 ${
         selected
-          ? "border-brand bg-brand text-brand-foreground shadow-[0_0_0_1px_var(--brand)]"
-          : "border-line bg-surface-2 hover:border-brand/60 hover:bg-surface"
+          ? "border-brand bg-brand text-brand-foreground shadow-[0_0_14px_var(--brand)]"
+          : "border-line bg-surface-2 hover:border-brand hover:bg-surface hover:shadow-[0_0_10px_var(--brand)]"
       }`}
     >
-      <span className={`text-xs ${selected ? "opacity-80" : "text-muted"}`}>{selection.outcome}</span>
-      <span className="font-display font-semibold tabular-nums">{formatPrice(selection.price)}</span>
+      <span className={`text-xs uppercase tracking-wide ${selected ? "opacity-80" : "text-muted"}`}>
+        {selection.outcome}
+      </span>
+      <span className="font-display font-bold tabular-nums">{formatPrice(selection.price)}</span>
     </button>
   );
 }

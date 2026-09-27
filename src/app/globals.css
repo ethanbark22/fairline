@@ -17,8 +17,8 @@
   --brand: #0a8f4f;
   --brand-strong: #067a3f;
   --brand-foreground: #ffffff;
-  --accent: #f2a900;
-  --accent-foreground: #1a1300;
+  --accent: #22c55e;
+  --accent-foreground: #ffffff;
   --danger: #e0264f;
   --warning: #b8791a;
   --warning-bg: #fbf0dd;
@@ -58,8 +58,8 @@
     --brand: #17d976;
     --brand-strong: #0fae5d;
     --brand-foreground: #06130d;
-    --accent: #ffc531;
-    --accent-foreground: #221800;
+    --accent: #4ef08a;
+    --accent-foreground: #052e12;
     --danger: #ff4d70;
     --warning: #f0b34e;
     --warning-bg: rgba(240, 179, 78, 0.12);
